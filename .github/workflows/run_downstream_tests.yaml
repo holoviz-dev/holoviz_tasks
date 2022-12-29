@@ -77,7 +77,7 @@ jobs:
         repo: ${{ matrix.downstream_repo }}
         github_token: ${{ secrets.ACCESS_TOKEN }}
         workflow_file_name: test.yaml
-        ref: master
+        ref: main
         wait_interval: 120
         propagate_failure: true
         trigger_workflow: true

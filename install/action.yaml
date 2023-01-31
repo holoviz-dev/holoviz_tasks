@@ -56,7 +56,9 @@ runs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: "100"
-    - run: git fetch --prune --tags --unshallow
+      # Forcing fetch to avoid 'would clobber existing tag', as the previous step
+      # fetches tags already.
+    - run: git fetch --prune --tags --unshallow --force
       shell: bash -el {0}
     - uses: actions/setup-python@v4
       with:

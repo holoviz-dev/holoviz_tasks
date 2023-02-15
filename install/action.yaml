@@ -27,6 +27,10 @@ inputs:
     description: Whether to install nodejs in the base environment
     required: false
     default: 'false'
+  nodejs-version:
+    description: nodejs version to install in the base environment
+    required: false
+    default: '16'
   cache:
     description: Whether to enable caching
     required: false
@@ -90,7 +94,7 @@ runs:
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
       run: |
-        ${{ inputs.conda-mamba }} install nodejs
+        ${{ inputs.conda-mamba }} install nodejs=${{ inputs.nodejs-version }}
       shell: bash -el {0}
     - if: steps.cache.outputs.cache-hit != 'true'
       run: |

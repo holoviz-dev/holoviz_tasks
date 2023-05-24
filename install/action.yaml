@@ -115,7 +115,7 @@ runs:
         conda config --env --set channel_priority ${{ inputs.channel-priority }}
         conda config --show-sources
         conda info
-        ${{ inputs.conda-mamba }} install python=${{ inputs.python-version }} pyctdev
+        ${{ inputs.conda-mamba }} install python=${{ inputs.python-version }} pyctdev nomkl
       shell: bash -el {0}
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit == 'true'
       run: |

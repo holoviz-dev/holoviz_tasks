@@ -50,6 +50,10 @@ inputs:
     options:
       - 'conda'
       - 'mamba'
+  add-environment-variables:
+    description: Whether to add environment variables to the environment
+    required: false
+    default: 'true'
 outputs:
   cache-hit:
     description: Whether the cache was hit
@@ -79,6 +83,20 @@ runs:
       shell: bash -el {0}
     - if: runner.os != 'Windows'
       run: echo "ENVS_PATH=${{ format('{0}/{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
+      shell: bash -el {0}
+    - if: inputs.add-environment-variables == 'true'
+      run: |
+        # Set number of threads to 1 to avoid multiprocessing issues
+        # This is really conservative, but it is better to
+        # do it this way because it is pain to debug.
+        echo "OMP_NUM_THREADS=1" >> $GITHUB_ENV
+        echo "OPENBLAS_NUM_THREADS=1" >> $GITHUB_ENV
+        echo "MKL_NUM_THREADS=1" >> $GITHUB_ENV
+        echo "VECLIB_MAXIMUM_THREADS=1" >> $GITHUB_ENV
+        echo "NUMEXPR_NUM_THREADS=1" >> $GITHUB_ENV
+
+        # This is to avoid warnings for debugpy on newer versions of Python
+        echo "PYDEVD_DISABLE_FILE_VALIDATION=1" >> $GITHUB_ENV
       shell: bash -el {0}
     - if: inputs.cache == 'true'
       uses: actions/cache@v3

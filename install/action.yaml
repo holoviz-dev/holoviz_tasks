@@ -62,7 +62,10 @@ runs:
         fetch-depth: "100"
       # Forcing fetch to avoid 'would clobber existing tag', as the previous step
       # fetches tags already.
-    - run: git fetch --prune --tags --unshallow --force
+    - run: |
+        echo "::group::Fetch tags"
+        git fetch --prune --tags --unshallow --force
+        echo "::endgroup::"
       shell: bash -el {0}
     - uses: actions/setup-python@v4
       with:
@@ -74,6 +77,7 @@ runs:
         # use-only-tar-bz2: ${{ inputs.cache }}  # Does not give latest version
     - run: echo "TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
       shell: bash -el {0}
+      name: Set $TODAY
     - if: runner.os == 'Windows'
       run: echo "ENVS_PATH=${{ format('{0}\{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
       shell: bash -el {0}
@@ -88,9 +92,11 @@ runs:
       id: cache
     - if: inputs.conda-mamba == 'mamba' && steps.cache.outputs.cache-hit != 'true'
       run: |
+        echo "::group::Setup mamba"
         echo "MAMBA_NO_BANNER=1" >> $GITHUB_ENV
         conda install mamba -c conda-forge -n base
         conda run -n base mamba init --all
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
       uses: actions/setup-node@v1
@@ -98,6 +104,7 @@ runs:
        node-version: ${{ inputs.nodejs-version }}
     - if: steps.cache.outputs.cache-hit != 'true'
       run: |
+        echo "::group::Setup conda environment"
         conda create -n test-environment
         conda activate test-environment
         IFS="," read -a channels_array <<< ${{ inputs.channels }}
@@ -116,48 +123,65 @@ runs:
         conda config --show-sources
         conda info
         ${{ inputs.conda-mamba }} install python=${{ inputs.python-version }} pyctdev nomkl
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit == 'true'
       run: |
+        echo "::group::Installing package (with cache)"
         conda activate test-environment
         pip install -e . --no-deps --no-build-isolation
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.cache != 'true' || steps.cache.outputs.cache-hit != 'true'
       # Need || echo "Keep going" and pip install again to deal with
       # when pyctdev updates CPython itself. Dangerous as that could
       # hide other issues.
       run: |
+        echo "::group::Installing package (no cache)"
         conda activate test-environment
         doit develop_install ${{ inputs.envs }} --conda-mode=${{ inputs.conda-mamba }} || echo "Keep going"
         pip install -e . --no-deps --no-build-isolation
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.opengl == 'true' && runner.os == 'Windows'
       run: |
+        echo "::group::Install OpenGL"
         git clone --depth 1 https://github.com/pyvista/gl-ci-helpers.git
         powershell gl-ci-helpers/appveyor/install_opengl.ps1
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.opengl == 'true' && runner.os == 'Linux'
       run: |
+        echo "::group::Install OpenGL"
         sudo apt-get install libglu1-mesa
         /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24
         sleep 3
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.opengl == 'true' && runner.os == 'Linux' && (inputs.cache != 'true' || steps.cache.outputs.cache-hit != 'true')
       run: |
+        echo "::group::Install mesalib (no cache)"
         conda activate test-environment
         ${{ inputs.conda-mamba }} install mesalib
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.playwright == 'true' && (inputs.cache != 'true' || steps.cache.outputs.cache-hit != 'true')
       run: |
+        echo "::group::Install playwright"
         conda activate test-environment
         pip install playwright pytest-playwright
+        echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.playwright == 'true'
       run: |
+        echo "::group::Install playwright browser"
         conda activate test-environment
         playwright install chromium
+        echo "::endgroup::"
       shell: bash -el {0}
     - run: |
+        echo "::group::Capture environment"
         conda activate test-environment
         doit env_capture
+        echo "::endgroup::"
       shell: bash -el {0}

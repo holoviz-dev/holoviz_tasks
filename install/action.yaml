@@ -62,7 +62,10 @@ runs:
         fetch-depth: "100"
       # Forcing fetch to avoid 'would clobber existing tag', as the previous step
       # fetches tags already.
-    - run: git fetch --prune --tags --unshallow --force
+    - run: |
+        echo "::group::Fetch tags"
+        git fetch --prune --tags --unshallow --force
+        echo "::endgroup::"
       shell: bash -el {0}
     - uses: actions/setup-python@v4
       with:
@@ -72,22 +75,14 @@ runs:
         miniconda-version: "latest"
         auto-update-conda: ${{ inputs.conda-update }}
         # use-only-tar-bz2: ${{ inputs.cache }}  # Does not give latest version
-    - run: |
-        echo "::group::Setup $TODAY"
-        echo "TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-        echo "::endgroup::"
+    - run: echo "TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
       shell: bash -el {0}
+      name: Set $TODAY
     - if: runner.os == 'Windows'
-      run: |
-        echo "::group::Setup $ENVS_PATH"
-        echo "ENVS_PATH=${{ format('{0}\{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
-        echo "::endgroup::"
+      run: echo "ENVS_PATH=${{ format('{0}\{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
       shell: bash -el {0}
     - if: runner.os != 'Windows'
-      run: |
-        echo "::group::Setup $ENVS_PATH"
-        echo "ENVS_PATH=${{ format('{0}/{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
-        echo "::endgroup::"
+      run: echo "ENVS_PATH=${{ format('{0}/{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
       shell: bash -el {0}
     - if: inputs.cache == 'true'
       uses: actions/cache@v3

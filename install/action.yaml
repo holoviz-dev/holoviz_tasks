@@ -160,7 +160,7 @@ runs:
       shell: bash -el {0}
     - if: inputs.opengl == 'true' && runner.os == 'Linux' && (inputs.cache != 'true' || steps.cache.outputs.cache-hit != 'true')
       run: |
-        echo "::group::Install OpenGL (no cache)"
+        echo "::group::Install mesalib (no cache)"
         conda activate test-environment
         ${{ inputs.conda-mamba }} install mesalib
         echo "::endgroup::"

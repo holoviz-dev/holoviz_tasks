@@ -47,13 +47,6 @@ inputs:
     description: Whether to install playwright
     required: false
     default: 'false'
-  conda-mamba:
-    description: "DEPRECATED: Whether to use conda or mamba"
-    required: false
-    default: 'conda'
-    options:
-      - 'conda'
-      - 'mamba'
 outputs:
   cache-hit:
     description: Whether the cache was hit

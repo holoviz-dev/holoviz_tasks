@@ -96,10 +96,9 @@ runs:
       id: cache
     - if: inputs.conda-mamba == 'mamba' && steps.cache.outputs.cache-hit != 'true'
       run: |
-        echo "::group::Setup mamba"
+        echo "::group::Setup libmamba-solver"
         conda install -n base conda-libmamba-solver
         conda config --set solver libmamba
-        echo "alias mamba=conda" >> ~/.bashrc
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
@@ -126,7 +125,7 @@ runs:
         conda config --env --set channel_priority ${{ inputs.channel-priority }}
         conda config --show-sources
         conda info
-        ${{ inputs.conda-mamba }} install python=${{ inputs.python-version }} pyctdev nomkl
+        conda install python=${{ inputs.python-version }} pyctdev nomkl
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit == 'true'

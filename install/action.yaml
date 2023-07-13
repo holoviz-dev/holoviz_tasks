@@ -48,7 +48,7 @@ inputs:
     required: false
     default: 'false'
   conda-mamba:
-    description: Whether to use conda or mamba
+    description: "DEPRECATED: Whether to use conda or mamba"
     required: false
     default: 'conda'
     options:
@@ -94,9 +94,8 @@ runs:
         path: ${{ env.ENVS_PATH }}
         key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.conda-mamba }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}
       id: cache
-    - if: inputs.conda-mamba == 'mamba' && steps.cache.outputs.cache-hit != 'true'
-      run: |
-        echo "::group::Setup libmamba-solver"
+    - run: |
+        echo "::group::Setup conda-libmamba-solver"
         conda install -n base conda-libmamba-solver
         conda config --set solver libmamba
         echo "::endgroup::"

@@ -125,7 +125,7 @@ runs:
         conda config --env --set channel_priority ${{ inputs.channel-priority }}
         conda config --show-sources
         conda info
-        conda install python=${{ inputs.python-version }} pyctdev nomkl
+        conda install python=${{ inputs.python-version }} pyctdev nomkl conda-libmamba-solver
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit == 'true'

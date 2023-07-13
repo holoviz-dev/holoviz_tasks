@@ -99,7 +99,7 @@ runs:
         echo "::group::Setup mamba"
         echo "MAMBA_NO_BANNER=1" >> $GITHUB_ENV
         conda install -n base --override-channels -c conda-forge mamba 'python_abi=*=*cp*'
-        conda run -n base mamba init --all
+        # conda run -n base mamba init --all
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'

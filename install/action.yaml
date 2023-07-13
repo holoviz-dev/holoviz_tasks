@@ -97,9 +97,9 @@ runs:
     - if: inputs.conda-mamba == 'mamba' && steps.cache.outputs.cache-hit != 'true'
       run: |
         echo "::group::Setup mamba"
-        echo "MAMBA_NO_BANNER=1" >> $GITHUB_ENV
-        conda install -n base --override-channels -c conda-forge mamba 'python_abi=*=*cp*'
-        # conda run -n base mamba init --all
+        conda install -n base conda-libmamba-solver
+        conda config --set solver libmamba
+        echo "alias mamba=conda" >> ~/.bashrc
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
@@ -143,7 +143,7 @@ runs:
       run: |
         echo "::group::Installing package (no cache)"
         conda activate test-environment
-        doit develop_install ${{ inputs.envs }} --conda-mode=${{ inputs.conda-mamba }} || echo "Keep going"
+        doit develop_install ${{ inputs.envs }} || echo "Keep going"
         pip install -e . --no-deps --no-build-isolation
         echo "::endgroup::"
       shell: bash -el {0}
@@ -166,7 +166,7 @@ runs:
       run: |
         echo "::group::Install mesalib (no cache)"
         conda activate test-environment
-        ${{ inputs.conda-mamba }} install mesalib
+        conda install mesalib
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.playwright == 'true' && (inputs.cache != 'true' || steps.cache.outputs.cache-hit != 'true')

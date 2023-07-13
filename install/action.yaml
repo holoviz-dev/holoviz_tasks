@@ -15,6 +15,10 @@ inputs:
     description: Whether to update conda
     required: false
     default: 'true'
+  miniconda-version:
+    description: The version of miniconda to install
+    required: false
+    default: 'latest'
   python-version:
     description: The Python version to install
     required: true
@@ -72,7 +76,7 @@ runs:
         python-version: ${{ inputs.python-version }}
     - uses: conda-incubator/setup-miniconda@v2
       with:
-        miniconda-version: "latest"
+        miniconda-version: ${{ inputs.miniconda-version }}
         auto-update-conda: ${{ inputs.conda-update }}
         # use-only-tar-bz2: ${{ inputs.cache }}  # Does not give latest version
     - run: echo "TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV

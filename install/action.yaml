@@ -15,6 +15,10 @@ inputs:
     description: Whether to update conda
     required: false
     default: 'true'
+  miniconda-version:
+    description: The version of miniconda to install
+    required: false
+    default: 'latest'
   python-version:
     description: The Python version to install
     required: true
@@ -43,13 +47,6 @@ inputs:
     description: Whether to install playwright
     required: false
     default: 'false'
-  conda-mamba:
-    description: Whether to use conda or mamba
-    required: false
-    default: 'conda'
-    options:
-      - 'conda'
-      - 'mamba'
 outputs:
   cache-hit:
     description: Whether the cache was hit
@@ -72,7 +69,7 @@ runs:
         python-version: ${{ inputs.python-version }}
     - uses: conda-incubator/setup-miniconda@v2
       with:
-        miniconda-version: "latest"
+        miniconda-version: ${{ inputs.miniconda-version }}
         auto-update-conda: ${{ inputs.conda-update }}
         # use-only-tar-bz2: ${{ inputs.cache }}  # Does not give latest version
     - run: echo "TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
@@ -90,12 +87,10 @@ runs:
         path: ${{ env.ENVS_PATH }}
         key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.conda-mamba }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}
       id: cache
-    - if: inputs.conda-mamba == 'mamba' && steps.cache.outputs.cache-hit != 'true'
-      run: |
-        echo "::group::Setup mamba"
-        echo "MAMBA_NO_BANNER=1" >> $GITHUB_ENV
-        conda install mamba -c conda-forge -n base
-        conda run -n base mamba init --all
+    - run: |
+        echo "::group::Setup conda-libmamba-solver"
+        conda install -n base conda-libmamba-solver
+        conda config --set solver libmamba
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
@@ -122,7 +117,7 @@ runs:
         conda config --env --set channel_priority ${{ inputs.channel-priority }}
         conda config --show-sources
         conda info
-        ${{ inputs.conda-mamba }} install python=${{ inputs.python-version }} pyctdev nomkl
+        conda install python=${{ inputs.python-version }} pyctdev nomkl conda-libmamba-solver
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit == 'true'
@@ -139,7 +134,7 @@ runs:
       run: |
         echo "::group::Installing package (no cache)"
         conda activate test-environment
-        doit develop_install ${{ inputs.envs }} --conda-mode=${{ inputs.conda-mamba }} || echo "Keep going"
+        doit develop_install ${{ inputs.envs }} || echo "Keep going"
         pip install -e . --no-deps --no-build-isolation
         echo "::endgroup::"
       shell: bash -el {0}
@@ -162,7 +157,7 @@ runs:
       run: |
         echo "::group::Install mesalib (no cache)"
         conda activate test-environment
-        ${{ inputs.conda-mamba }} install mesalib
+        conda install mesalib
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.playwright == 'true' && (inputs.cache != 'true' || steps.cache.outputs.cache-hit != 'true')

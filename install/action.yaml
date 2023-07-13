@@ -98,7 +98,8 @@ runs:
       run: |
         echo "::group::Setup mamba"
         echo "MAMBA_NO_BANNER=1" >> $GITHUB_ENV
-        conda install mamba -c conda-forge -n base --solver classic
+        conda install conda-libmamba-solver -c conda-forge -n base
+        conda install mamba -c conda-forge -n base
         conda run -n base mamba init --all
         echo "::endgroup::"
       shell: bash -el {0}

@@ -94,7 +94,7 @@ runs:
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
        node-version: ${{ inputs.nodejs-version }}
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -178,5 +178,13 @@ runs:
         echo "::group::Capture environment"
         conda activate test-environment
         doit env_capture
+        echo "::endgroup::"
+      shell: bash -el {0}
+    - if: inputs.nodejs == 'true'
+      run: |
+        echo "::group::Capture node and npm version"
+        conda activate test-environment
+        node --version
+        npm --version
         echo "::endgroup::"
       shell: bash -el {0}

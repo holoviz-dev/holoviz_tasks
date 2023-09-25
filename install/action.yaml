@@ -184,7 +184,7 @@ runs:
       shell: bash -el {0}
     - uses: actions/upload-artifact@v3
       with:
-        name: ${{ env.REPO_NAME }}_#${{ github.event.number }}
+        name: ${{ env.REPO_NAME }}_${{ github.event.number }}
         path: environment_${{ inputs.name }}_${{ inputs.python-version }}_${{ runner.os }}.yml
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3

@@ -24,12 +24,14 @@ runs:
         path: ~/.cache/pre-commit
         key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
     - name: "Run pre-commit"
-      shell: bash -el {0}
+      shell: bash -e {0}
       run: |
         echo '```console' > $GITHUB_STEP_SUMMARY
         # Enable color output for pre-commit and remove it for the summary
         pre-commit run --all-files --show-diff-on-failure --color=always | \
           tee >(sed -E 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})*)?[mGK]//g' >> $GITHUB_STEP_SUMMARY) >&1
+        echo $PIPESTATUS
         exit_code=${PIPESTATUS[0]}
+        echo $exit_code
         echo '```' >> $GITHUB_STEP_SUMMARY
         exit $exit_code

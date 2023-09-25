@@ -12,7 +12,7 @@ jobs:
     name: Run pre-commit
     runs-on: "ubuntu-latest"
     steps:
-      - uses: holoviz-dev/holoviz_tasks/pre-commit@update_task
+      - uses: holoviz-dev/holoviz_tasks/pre-commit@main
 ```
 
 ## Summary page

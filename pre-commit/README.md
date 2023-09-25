@@ -4,7 +4,7 @@ This action runs the pre-commit actions and will output the results to the summa
 
 ## Example
 
-Here is an example using the pre-commit action to set up and cache a complicated environment:
+Here is an example using the pre-commit action:
 
 ```yaml
 jobs:

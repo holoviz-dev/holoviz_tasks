@@ -18,11 +18,6 @@ runs:
         path: ~/.cache/pre-commit
         key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
       id: cache
-    - if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
-      with:
-        path: ~/.cache/pre-commit
-        key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
     - name: "Run pre-commit"
       shell: bash -e {0}
       run: |
@@ -33,3 +28,8 @@ runs:
         exit_code=${PIPESTATUS[0]}
         echo '```' >> $GITHUB_STEP_SUMMARY
         exit $exit_code
+    - if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}

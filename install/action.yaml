@@ -64,9 +64,6 @@ runs:
         git fetch --prune --tags --unshallow --force
         echo "::endgroup::"
       shell: bash -el {0}
-    - uses: actions/setup-python@v4
-      with:
-        python-version: ${{ inputs.python-version }}
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: ${{ inputs.miniconda-version }}

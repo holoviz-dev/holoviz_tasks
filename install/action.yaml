@@ -34,7 +34,7 @@ inputs:
   nodejs-version:
     description: nodejs version to install in the base environment
     required: false
-    default: '16.x'
+    default: '18.x'
   cache:
     description: Whether to enable caching
     required: false
@@ -204,7 +204,7 @@ runs:
       run: |
         echo "::group::Capture node and npm version"
         conda activate test-environment
-        node --version
-        npm --version
+        node --version || echo "Node not installed"
+        npm --version || echo "npm not installed"
         echo "::endgroup::"
       shell: bash -el {0}

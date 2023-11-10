@@ -34,7 +34,7 @@ inputs:
   nodejs-version:
     description: nodejs version to install in the base environment
     required: false
-    default: '16.x'
+    default: '18.x'
   cache:
     description: Whether to enable caching
     required: false
@@ -98,7 +98,7 @@ runs:
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
        node-version: ${{ inputs.nodejs-version }}
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -200,3 +200,11 @@ runs:
       with:
         path: ${{ env.ENVS_PATH }}
         key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}
+    - if: inputs.nodejs == 'true'
+      run: |
+        echo "::group::Capture node and npm version"
+        conda activate test-environment
+        node --version || echo "Node not installed"
+        npm --version || echo "npm not installed"
+        echo "::endgroup::"
+      shell: bash -el {0}

@@ -47,6 +47,10 @@ inputs:
     description: Whether to install playwright
     required: false
     default: 'false'
+  playwright-version:
+    description: playwright version to install
+    required: false
+    default: "false"
 outputs:
   cache-hit:
     description: Whether the cache was hit
@@ -82,10 +86,10 @@ runs:
       run: echo "ENVS_PATH=${{ format('{0}/{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
       shell: bash -el {0}
     - if: inputs.cache == 'true'
-      uses: actions/cache@v3
+      uses: actions/cache/restore@v3
       with:
         path: ${{ env.ENVS_PATH }}
-        key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.conda-mamba }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}
+        key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}
       id: cache
     - run: |
         echo "::group::Setup conda-libmamba-solver"
@@ -164,7 +168,12 @@ runs:
       run: |
         echo "::group::Install playwright"
         conda activate test-environment
-        pip install playwright pytest-playwright
+        if [ "${{ inputs.playwright-version }}" = "false" ]
+        then
+          pip install playwright pytest-playwright
+        else
+          pip install playwright==${{ inputs.playwright-version }} pytest-playwright
+        fi
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.playwright == 'true'
@@ -178,8 +187,19 @@ runs:
         echo "::group::Capture environment"
         conda activate test-environment
         doit env_capture
+        conda env export > environment_${{ inputs.name }}_${{ inputs.python-version }}_${{ runner.os }}.yml
+        echo "REPO_NAME=$(basename ${{ github.repository }})" >> $GITHUB_ENV
         echo "::endgroup::"
       shell: bash -el {0}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.REPO_NAME }}_${{ github.event.number }}
+        path: environment_${{ inputs.name }}_${{ inputs.python-version }}_${{ runner.os }}.yml
+    - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ env.ENVS_PATH }}
+        key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}
     - if: inputs.nodejs == 'true'
       run: |
         echo "::group::Capture node and npm version"

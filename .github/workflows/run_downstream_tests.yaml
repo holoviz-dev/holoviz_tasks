@@ -101,7 +101,7 @@ jobs:
         repo: ${{ matrix.downstream_repo }}
         github_token: ${{ secrets.ACCESS_TOKEN }}
         workflow_file_name: test.yaml
-        payload: '{"target": "downstream", "cache": false}'
+        client_payload: '{"target": "downstream", "cache": false}'
         ref: infrastructure2 # main
         wait_interval: 120
         propagate_failure: true

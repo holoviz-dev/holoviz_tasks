@@ -18,8 +18,8 @@ jobs:
     name: Check if new version of {{ env.UPSTREAM_REPO }} available on pyviz/label/dev
     runs-on: ubuntu-latest
     # Run only if the caller workflow has completed with success,
-    # or if it has a `manual` input set to true. 
-    if: ${{ (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success') || github.event.inputs.manual == 'true' }} 
+    # or if it has a `manual` input set to true.
+    if: ${{ (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success') || github.event.inputs.manual == 'true' }}
     timeout-minutes: 10
     steps:
     - name: Print event data
@@ -53,7 +53,7 @@ jobs:
         # it'll be set to the version found in the metadata, i.e. 1.12.1a1 (jq -r removes
         # the surrounding quotes).
         # Using only pyviz/label/dev for the search, since dev releases and releases can
-        # both be found in this channel. 
+        # both be found in this channel.
         echo "version=$(conda search --override-channels -c pyviz/label/dev '${{ env.UPSTREAM_REPO }}==${{ steps.from_git.outputs.version }}' --json | jq -r '.${{ env.UPSTREAM_REPO }}[0].version')"  >> $GITHUB_OUTPUT
     - name: Print tag and conda version found
       run: |
@@ -71,12 +71,28 @@ jobs:
     timeout-minutes: 240
     steps:
     - name: Trigger downstream test workflow and wait
+      if: matrix.downstream_repo != 'holoviews'
       uses: convictional/trigger-workflow-and-wait@v1.6.5
       with:
         owner: holoviz
         repo: ${{ matrix.downstream_repo }}
         github_token: ${{ secrets.ACCESS_TOKEN }}
         workflow_file_name: test.yaml
+        ref: main
+        wait_interval: 120
+        propagate_failure: true
+        trigger_workflow: true
+        wait_workflow: true
+    # Payload is only supported for now in HoloViews
+    - name: Trigger downstream test workflow and wait
+      if: matrix.downstream_repo == 'holoviews'
+      uses: convictional/trigger-workflow-and-wait@v1.6.5
+      with:
+        owner: holoviz
+        repo: ${{ matrix.downstream_repo }}
+        github_token: ${{ secrets.ACCESS_TOKEN }}
+        workflow_file_name: test.yaml
+        payload: '{"target": "downstream", "cache": false}'
         ref: main
         wait_interval: 120
         propagate_failure: true

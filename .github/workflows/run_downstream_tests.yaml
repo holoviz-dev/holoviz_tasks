@@ -9,6 +9,15 @@ on:
     secrets:
       ACCESS_TOKEN:
         required: true
+  workflow_dispatch:
+    inputs:
+      downstream_repos_as_json:
+        description: 'A JSON string of downstream repos to test'
+        required: true
+        type: string
+    secrets:
+      ACCESS_TOKEN:
+        required: true
 
 env:
   UPSTREAM_REPO: ${{ github.event.repository.name }}

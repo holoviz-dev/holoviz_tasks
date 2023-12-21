@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     # Run only if the caller workflow has completed with success,
     # or if it has a `manual` input set to true.
-    if: ${{ (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success') || github.event.inputs.manual == 'true' }}
+    if: ${{ (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success') || github.event.inputs.manual == 'true' || github.event_name == 'workflow_dispatch' }}
     timeout-minutes: 10
     steps:
     - name: Print event data
@@ -69,7 +69,7 @@ jobs:
         echo "git tag: ${{ steps.from_git.outputs.version }}"
         echo "conda version: ${{ steps.from_conda.outputs.version }}"
     - name: Stop if git tag and conda version are different
-      if: ${{ steps.from_git.outputs.version != steps.from_conda.outputs.version }}
+      if: ${{ steps.from_git.outputs.version != steps.from_conda.outputs.version && github.event_name != 'workflow_dispatch' }}
       run: exit 1
   downstream_tests:
     needs: check_if_new_version_available

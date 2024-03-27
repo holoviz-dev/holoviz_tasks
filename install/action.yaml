@@ -58,7 +58,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: "100"
       # Forcing fetch to avoid 'would clobber existing tag', as the previous step
@@ -68,10 +68,10 @@ runs:
         git fetch --prune --tags --unshallow --force
         echo "::endgroup::"
       shell: bash -el {0}
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         miniconda-version: ${{ inputs.miniconda-version }}
         auto-update-conda: ${{ inputs.conda-update }}
@@ -86,7 +86,7 @@ runs:
       run: echo "ENVS_PATH=${{ format('{0}/{1}', env.CONDA, 'envs') }}" >> $GITHUB_ENV
       shell: bash -el {0}
     - if: inputs.cache == 'true'
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ env.ENVS_PATH }}
         key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}
@@ -98,7 +98,7 @@ runs:
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.nodejs == 'true' && steps.cache.outputs.cache-hit != 'true'
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
        node-version: ${{ inputs.nodejs-version }}
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -140,6 +140,7 @@ runs:
         conda activate test-environment
         doit develop_install ${{ inputs.envs }} || echo "Keep going"
         pip install -e . --no-deps --no-build-isolation
+        conda install conda==24.1.2
         echo "::endgroup::"
       shell: bash -el {0}
     - if: inputs.opengl == 'true' && runner.os == 'Windows'
@@ -186,7 +187,8 @@ runs:
     - run: |
         echo "::group::Capture environment"
         conda activate test-environment
-        doit env_capture
+        conda info
+        conda list
         conda env export > environment_${{ inputs.name }}_${{ inputs.python-version }}_${{ runner.os }}.yml
         echo "REPO_NAME=$(basename ${{ github.repository }})" >> $GITHUB_ENV
         echo "::endgroup::"
@@ -196,7 +198,7 @@ runs:
         name: ${{ env.REPO_NAME }}_${{ github.event.number }}
         path: environment_${{ inputs.name }}_${{ inputs.python-version }}_${{ runner.os }}.yml
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: ${{ env.ENVS_PATH }}
         key: ${{ inputs.name  }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('setup.py') }}-${{ env.TODAY }}

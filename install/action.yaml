@@ -186,7 +186,8 @@ runs:
     - run: |
         echo "::group::Capture environment"
         conda activate test-environment
-        doit env_capture
+        conda info
+        conda list
         conda env export > environment_${{ inputs.name }}_${{ inputs.python-version }}_${{ runner.os }}.yml
         echo "REPO_NAME=$(basename ${{ github.repository }})" >> $GITHUB_ENV
         echo "::endgroup::"

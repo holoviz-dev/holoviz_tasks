@@ -11,11 +11,14 @@ runs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: "100"
-    - name: Fetch
+    - name: Fetching tags
       shell: bash -el {0}
-      run: git fetch --prune --tags -f
+      run: |
+        echo "::group::Fetching tags"
+        git fetch --prune --tags -f
+        echo "::endgroup::"
     - uses: actions/download-artifact@v4
-      with:
+      with:  # TODO: just ignore this if it does not exists
         name: pixi-lock
         path: .
     - uses: prefix-dev/setup-pixi@v0.5.1

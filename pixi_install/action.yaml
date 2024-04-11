@@ -25,5 +25,12 @@ runs:
       with:
         pixi-version: v0.19.0  # TODO: make this a input
         manifest-path: pixi.toml # TODO: make this a input
-        environments: ${{ inputs.environments}}
+        environments: ${{ inputs.environments }}
         cache: false  # Cache is slower than downloading!
+    - name: Download data
+      shell: bash -el {0}
+      run: |
+        echo "::group::Download data"
+        # INFO: Does not really work with environments as it can be multiple but good enough
+        pixi run -e ${{ inputs.environments }} download-data || echo "No data to download"
+        echo "::endgroup::"

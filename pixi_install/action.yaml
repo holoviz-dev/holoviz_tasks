@@ -38,7 +38,7 @@ runs:
         environments: ${{ inputs.environments }}
         cache: false  # Cache is slower than downloading!
     - name: Download data
-      if: ${{ inputs.download-data }}
+      if: ${{ inputs.download-data == 'true' }}
       shell: bash -el {0}
       run: |
         echo "::group::Download data"

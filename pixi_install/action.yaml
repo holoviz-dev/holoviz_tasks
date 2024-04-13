@@ -8,6 +8,12 @@ inputs:
     description: download data
     required: false
     default: true
+  pixi-version:
+    description: The version of pixi to use
+    required: false
+  pixi-manifest-path:
+    description: The path to the pixi manifest file
+    required: false
 
 runs:
   using: "composite"
@@ -27,8 +33,8 @@ runs:
         path: .
     - uses: prefix-dev/setup-pixi@v0.5.1
       with:
-        pixi-version: v0.19.0  # TODO: make this an input
-        manifest-path: pixi.toml # TODO: make this an input
+        pixi-version: ${{ inputs.pixi-version }}
+        manifest-path: ${{ inputs.pixi-manifest-path }}
         environments: ${{ inputs.environments }}
         cache: false  # Cache is slower than downloading!
     - name: Download data

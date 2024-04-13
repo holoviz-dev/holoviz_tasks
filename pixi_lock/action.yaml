@@ -5,6 +5,12 @@ inputs:
     description: Whether to enable caching of the lock-file
     required: true
     default: "true"
+  pixi-version:
+    description: The version of pixi to use
+    required: false
+  pixi-manifest-path:
+    description: The path to the pixi manifest file
+    required: false
 
 runs:
   using: "composite"
@@ -29,8 +35,8 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       id: install
       with:
-        pixi-version: v0.19.0  # TODO: make this an input
-        manifest-path: pixi.toml # TODO: make this an input
+        pixi-version: ${{ inputs.pixi-version }}
+        manifest-path: ${{ inputs.pixi-manifest-path }}
     - uses: actions/upload-artifact@v4
       with:
         name: pixi-lock

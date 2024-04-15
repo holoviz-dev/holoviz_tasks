@@ -38,11 +38,18 @@ runs:
         manifest-path: ${{ inputs.pixi-manifest-path }}
         environments: ${{ inputs.environments }}
         cache: false  # Cache is slower than downloading!
+    - name: Install step
+      shell: bash -el {0}
+      run: |
+        echo "::group::Install"
+        pixi run -e ${{ inputs.environments }} install || echo "No install task"
+        echo "::endgroup::"
+
     - name: Download data
       if: ${{ inputs.download-data == 'true' }}
       shell: bash -el {0}
       run: |
         echo "::group::Download data"
         # INFO: Does not really work with environments as it can be multiple but good enough
-        pixi run -e ${{ inputs.environments }} download-data || echo "No data to download"
+        pixi run -e ${{ inputs.environments }} download-data || echo "No download-data task"
         echo "::endgroup::"

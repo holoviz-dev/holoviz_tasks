@@ -14,6 +14,10 @@ inputs:
   pixi-manifest-path:
     description: The path to the pixi manifest file
     required: false
+  environment_variables:
+    description: Whether to add global environment variables
+    required: false
+    default: true
 
 runs:
   using: "composite"
@@ -27,6 +31,20 @@ runs:
         echo "::group::Fetching tags"
         git fetch --prune --tags -f
         echo "::endgroup::"
+    - name: Setting environment variables
+      if: ${{ inputs.environment_variables == 'true' }}
+      shell: bash -el {0}
+      run: |
+        # Set number of threads to 1 to avoid multiprocessing issues
+        # This is really conservative, but it is better to
+        # do it this way because it is pain to debug.
+        echo "OMP_NUM_THREADS=1" >> $GITHUB_ENV
+        echo "OPENBLAS_NUM_THREADS=1" >> $GITHUB_ENV
+        echo "MKL_NUM_THREADS=1" >> $GITHUB_ENV
+        echo "VECLIB_MAXIMUM_THREADS=1" >> $GITHUB_ENV
+        echo "NUMEXPR_NUM_THREADS=1" >> $GITHUB_ENV
+        # This is to avoid warnings for debugpy on newer versions of Python
+        echo "PYDEVD_DISABLE_FILE_VALIDATION=1" >> $GITHUB_ENV
     - uses: actions/download-artifact@v4
       continue-on-error: true  # No artifact from pixi_lock action
       with:

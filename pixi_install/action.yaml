@@ -83,7 +83,6 @@ runs:
         echo "::group::Install"
         pixi run -e ${{ inputs.environments }} install -v || echo "No install task"
         echo "::endgroup::"
-
     - name: Download data
       if: ${{ inputs.download-data == 'true' }}
       shell: bash -el {0}

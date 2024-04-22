@@ -35,6 +35,7 @@ runs:
       if: ${{ inputs.environment_variables == 'true' }}
       shell: bash -el {0}
       run: |
+        # Set environment variables
         # Set number of threads to 1 to avoid multiprocessing issues
         # This is really conservative, but it is better to
         # do it this way because it is pain to debug.
@@ -60,7 +61,7 @@ runs:
       shell: bash -el {0}
       run: |
         echo "::group::Install"
-        pixi run -e ${{ inputs.environments }} install || echo "No install task"
+        pixi run -e ${{ inputs.environments }} install -v || echo "No install task"
         echo "::endgroup::"
 
     - name: Download data

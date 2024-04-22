@@ -52,10 +52,10 @@ runs:
         echo "PYDEVD_DISABLE_FILE_VALIDATION=1" >> $GITHUB_ENV
     - name: OpenGL (Windows)
       if: inputs.opengl == 'true' && runner.os == 'Windows'
-      shell: bash -el {0}
+      shell: pwsh
       run: |
         echo "::group::Install OpenGL"
-        powershell ${{ github.action_path }}/pixi_install/install_opengl.ps1
+        powershell ${{ github.action_path }}/install_opengl.ps1
         echo "::endgroup::"
     - name: OpenGL (Linux)
       if: inputs.opengl == 'true' && runner.os == 'Linux'

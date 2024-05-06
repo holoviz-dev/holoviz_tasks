@@ -15,6 +15,7 @@ inputs:
   pixi-version:
     description: The version of pixi to use
     required: false
+    default: v0.20.1
   pixi-manifest-path:
     description: The path to the pixi manifest file
     required: false

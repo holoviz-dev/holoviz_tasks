@@ -18,6 +18,12 @@ inputs:
   pixi-manifest-path:
     description: The path to the pixi manifest file
     required: false
+  pixi-activate-environment:
+    description: |
+      If the installed environment should be "activated" for the current job, modifying `$GITHUB_ENV` and
+      `$GITHUB_PATH`. If more than one environment is specified in `environments`, this must be the name of the
+      environment. Defaults to `false`. Requires at least pixi v0.21.0.
+    required: false
   environment_variables:
     description: Whether to add global environment variables
     required: false
@@ -80,6 +86,7 @@ runs:
         pixi-version: ${{ inputs.pixi-version }}
         manifest-path: ${{ inputs.pixi-manifest-path }}
         environments: ${{ inputs.environments }}
+        activate-environment: ${{ inputs.pixi-activate-environment }}
         cache: false  # Cache is slower than downloading!
     - name: Install step
       if: ${{ inputs.install == 'true' }}

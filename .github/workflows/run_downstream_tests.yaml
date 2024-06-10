@@ -48,7 +48,7 @@ jobs:
       run: echo "$EVENT"
     - name: Install jq
       run: sudo apt install -y jq
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       name: Checkout repo
       with:
         fetch-depth: "1"
@@ -58,7 +58,7 @@ jobs:
       id: from_git
       run: |
         echo "version=$(git tag -l --sort=-creatordate | head -n 1 | cut -c 2-)" >> $GITHUB_OUTPUT
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       name: Install conda with miniconda
       with:
         miniconda-version: "latest"

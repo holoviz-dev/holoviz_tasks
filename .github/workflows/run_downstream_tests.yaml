@@ -4,7 +4,13 @@ on:
   workflow_call:
     inputs:
       downstream_repos_as_json:
+        description: 'A JSON string of downstream repos to test'
         required: true
+        type: string
+      client_payload:
+        description: 'A JSON string of client payload to pass to downstream tests'
+        default: '{"target": "downstream", "cache": false}'
+        required: false
         type: string
     secrets:
       ACCESS_TOKEN:
@@ -15,6 +21,11 @@ on:
         description: 'A JSON string of downstream repos to test'
         required: true
         type: string
+      client_payload:
+        description: 'A JSON string of client payload to pass to downstream tests'
+        default: '{"target": "downstream", "cache": false}'
+        required: false
+        type: string
     secrets:
       ACCESS_TOKEN:
         required: true
@@ -24,11 +35,11 @@ env:
 
 jobs:
   check_if_new_version_available:
-    name: Check if new version of {{ env.UPSTREAM_REPO }} available on pyviz/label/dev
+    name: Check if new version of ${{ env.UPSTREAM_REPO }} available on pyviz/label/dev
     runs-on: ubuntu-latest
     # Run only if the caller workflow has completed with success,
-    # or if it has a `manual` input set to true. 
-    if: ${{ (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success') || github.event.inputs.manual == 'true' }} 
+    # or if it has a `manual` input set to true.
+    if: ${{ (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success') || github.event.inputs.manual == 'true' || github.event_name == 'workflow_dispatch' }}
     timeout-minutes: 10
     steps:
     - name: Print event data
@@ -37,7 +48,7 @@ jobs:
       run: echo "$EVENT"
     - name: Install jq
       run: sudo apt install -y jq
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       name: Checkout repo
       with:
         fetch-depth: "1"
@@ -47,7 +58,7 @@ jobs:
       id: from_git
       run: |
         echo "version=$(git tag -l --sort=-creatordate | head -n 1 | cut -c 2-)" >> $GITHUB_OUTPUT
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       name: Install conda with miniconda
       with:
         miniconda-version: "latest"
@@ -62,14 +73,14 @@ jobs:
         # it'll be set to the version found in the metadata, i.e. 1.12.1a1 (jq -r removes
         # the surrounding quotes).
         # Using only pyviz/label/dev for the search, since dev releases and releases can
-        # both be found in this channel. 
+        # both be found in this channel.
         echo "version=$(conda search --override-channels -c pyviz/label/dev '${{ env.UPSTREAM_REPO }}==${{ steps.from_git.outputs.version }}' --json | jq -r '.${{ env.UPSTREAM_REPO }}[0].version')"  >> $GITHUB_OUTPUT
     - name: Print tag and conda version found
       run: |
         echo "git tag: ${{ steps.from_git.outputs.version }}"
         echo "conda version: ${{ steps.from_conda.outputs.version }}"
     - name: Stop if git tag and conda version are different
-      if: ${{ steps.from_git.outputs.version != steps.from_conda.outputs.version }}
+      if: ${{ steps.from_git.outputs.version != steps.from_conda.outputs.version && github.event_name != 'workflow_dispatch' }}
       run: exit 1
   downstream_tests:
     needs: check_if_new_version_available
@@ -86,6 +97,7 @@ jobs:
         repo: ${{ matrix.downstream_repo }}
         github_token: ${{ secrets.ACCESS_TOKEN }}
         workflow_file_name: test.yaml
+        client_payload: ${{ inputs.client_payload }}
         ref: main
         wait_interval: 120
         propagate_failure: true

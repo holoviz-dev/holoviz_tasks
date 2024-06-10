@@ -15,6 +15,11 @@ on:
         description: 'A JSON string of downstream repos to test'
         required: true
         type: string
+      client_payload:
+        description: 'A JSON string of client payload to pass to downstream tests'
+        default: '{"cache": false}' # Should be something like this: '{"target": "downstream", "cache": false}'
+        required: false
+        type: string
     secrets:
       ACCESS_TOKEN:
         required: true
@@ -80,28 +85,13 @@ jobs:
     timeout-minutes: 240
     steps:
     - name: Trigger downstream test workflow and wait
-      if: matrix.downstream_repo != 'holoviews'
       uses: convictional/trigger-workflow-and-wait@v1.6.5
       with:
         owner: holoviz
         repo: ${{ matrix.downstream_repo }}
         github_token: ${{ secrets.ACCESS_TOKEN }}
         workflow_file_name: test.yaml
-        ref: main
-        wait_interval: 120
-        propagate_failure: true
-        trigger_workflow: true
-        wait_workflow: true
-    # Payload is only supported for now in HoloViews
-    - name: Trigger downstream test workflow and wait
-      if: matrix.downstream_repo == 'holoviews'
-      uses: convictional/trigger-workflow-and-wait@v1.6.5
-      with:
-        owner: holoviz
-        repo: ${{ matrix.downstream_repo }}
-        github_token: ${{ secrets.ACCESS_TOKEN }}
-        workflow_file_name: test.yaml
-        client_payload: '{"target": "downstream", "cache": false}'
+        client_payload: ${{ inputs.client_payload }}
         ref: main
         wait_interval: 120
         propagate_failure: true

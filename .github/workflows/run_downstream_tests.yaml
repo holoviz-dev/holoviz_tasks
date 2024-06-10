@@ -35,7 +35,7 @@ env:
 
 jobs:
   check_if_new_version_available:
-    name: Check if new version of {{ env.UPSTREAM_REPO }} available on pyviz/label/dev
+    name: Check if new version of ${{ env.UPSTREAM_REPO }} available on pyviz/label/dev
     runs-on: ubuntu-latest
     # Run only if the caller workflow has completed with success,
     # or if it has a `manual` input set to true.

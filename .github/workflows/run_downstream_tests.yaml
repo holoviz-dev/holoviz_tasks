@@ -4,7 +4,13 @@ on:
   workflow_call:
     inputs:
       downstream_repos_as_json:
+        description: 'A JSON string of downstream repos to test'
         required: true
+        type: string
+      client_payload:
+        description: 'A JSON string of client payload to pass to downstream tests'
+        default: '{"target": "downstream", "cache": false}'
+        required: false
         type: string
     secrets:
       ACCESS_TOKEN:
@@ -17,7 +23,7 @@ on:
         type: string
       client_payload:
         description: 'A JSON string of client payload to pass to downstream tests'
-        default: '{"cache": false}' # Should be something like this: '{"target": "downstream", "cache": false}'
+        default: '{"target": "downstream", "cache": false}'
         required: false
         type: string
     secrets:

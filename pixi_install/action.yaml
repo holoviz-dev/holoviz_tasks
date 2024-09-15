@@ -81,7 +81,7 @@ runs:
       with:
         name: pixi-lock
         path: .
-    - uses: prefix-dev/setup-pixi@v0.8.0
+    - uses: prefix-dev/setup-pixi@v0.8.1
       with:
         pixi-version: ${{ inputs.pixi-version }}
         manifest-path: ${{ inputs.pixi-manifest-path }}

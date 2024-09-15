@@ -91,6 +91,7 @@ runs:
     - name: Add pixi to PATH
       shell: bash -el {0}
       run: |
+        # Set PATH to include pixi
         # For some reason pixi is no longer available on mac os
         echo "PATH=$HOME/.pixi/bin:$PATH" >> ~/.bashrc
     - name: Install step

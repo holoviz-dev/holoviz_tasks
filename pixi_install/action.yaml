@@ -91,9 +91,7 @@ runs:
     - name: Temporary fix for macOS # https://github.com/actions/runner-images/issues/10624
       shell: bash -el {0}
       if: runner.os == 'macOS'
-      run: |
-         sed -i '' '/ export PATH;$/,+2d' ~/.bashrc || true
-         source ~/.bashrc
+      run: sed -i '' '/ export PATH;$/,+2d' ~/.bashrc || true
     - name: Install step
       if: ${{ inputs.install == 'true' }}
       shell: bash -el {0}

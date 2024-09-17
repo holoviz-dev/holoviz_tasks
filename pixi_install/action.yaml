@@ -88,12 +88,12 @@ runs:
         environments: ${{ inputs.environments }}
         activate-environment: ${{ inputs.pixi-activate-environment }}
         cache: false  # Cache is slower than downloading!
-    - name: Add pixi to PATH
+    - name: Temporary fix for macOS # https://github.com/actions/runner-images/issues/10624
       shell: bash -el {0}
+      if: runner.os == 'macOS'
       run: |
-        # Set PATH to include pixi
-        # For some reason pixi is no longer available on mac os
-        echo "PATH=$HOME/.pixi/bin:$PATH" >> ~/.bashrc
+         sed -i '' '/ export PATH;$/,+2d' ~/.bashrc || true
+         source ~/.bashrc
     - name: Install step
       if: ${{ inputs.install == 'true' }}
       shell: bash -el {0}

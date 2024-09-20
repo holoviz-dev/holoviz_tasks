@@ -68,15 +68,14 @@ runs:
         workspace-copy: true
         env-mapping: |
           PIXI_HOME,{{ DEV_DRIVE }}/.pixi
-          PACKAGE_CACHE_DIR,{{ DEV_DRIVE }}/.cache/package
-          REPODATA_CACHE_DIR,{{ DEV_DRIVE }}/.cache/repo
+          PIXI_CACHE_DIR,{{ DEV_DRIVE }}/.cache/package
           PIP_CACHE_DIR,{{ DEV_DRIVE }}/.cache/pip
           GITHUB_WORKSPACE,{{ DEV_DRIVE }}/holoviews
     - name: Setup external pixi environment
       if: runner.os == 'Windows'
       shell: bash -l {0}
       run:
-        echo pwd
+        pwd
     # - name: Setup external pixi environment
     #   if: runner.os == 'Windows'
     #   shell: pwsh

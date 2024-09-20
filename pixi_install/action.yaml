@@ -40,14 +40,14 @@ runs:
       with:
         fetch-depth: "100"
     - name: Fetching tags
-      shell: bash -el {0}
+      shell: bash -l {0}
       run: |
         echo "::group::Fetching tags"
         git fetch --prune --tags -f
         echo "::endgroup::"
     - name: Setting environment variables
       if: ${{ inputs.environment_variables == 'true' }}
-      shell: bash -el {0}
+      shell: bash -l {0}
       run: |
         # Set environment variables
         # Set number of threads to 1 to avoid multiprocessing issues
@@ -69,7 +69,7 @@ runs:
         echo "::endgroup::"
     - name: OpenGL (Linux)
       if: inputs.opengl == 'true' && runner.os == 'Linux'
-      shell: bash -el {0}
+      shell: bash -l {0}
       run: |
         echo "::group::Install OpenGL"
         sudo apt-get install libglu1-mesa
@@ -89,19 +89,19 @@ runs:
         activate-environment: ${{ inputs.pixi-activate-environment }}
         cache: false  # Cache is slower than downloading!
     - name: Temporary fix for macOS # https://github.com/actions/runner-images/issues/10624
-      shell: bash -el {0}
+      shell: bash -l {0}
       if: runner.os == 'macOS'
       run: sed -i '' '/ export PATH;$/,+2d' ~/.bashrc || true
     - name: Install step
       if: ${{ inputs.install == 'true' }}
-      shell: bash -el {0}
+      shell: bash -l {0}
       run: |
         echo "::group::Install"
         pixi run -e ${{ inputs.environments }} install -v
         echo "::endgroup::"
     - name: Download data
       if: ${{ inputs.download-data == 'true' }}
-      shell: bash -el {0}
+      shell: bash -l {0}
       run: |
         echo "::group::Download data"
         # INFO: Does not really work with environments as it can be multiple but good enough

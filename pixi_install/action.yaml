@@ -69,6 +69,14 @@ runs:
           PIXI_HOME,{{ DEV_DRIVE }}/.pixi
           PACKAGE_CACHE_DIR,{{ DEV_DRIVE }}/.cache/package
           REPODATA_CACHE_DIR,{{ DEV_DRIVE }}/.cache/repo
+          PIP_CACHE_DIR,{{ DEV_DRIVE }}/.cache/pip
+    # - name: Setup external pixi environment
+    #   if: runner.os == 'Windows'
+    #   shell: pwsh
+    #   run:
+    #
+    #     echo "detached-environments=$PIXI_HOME/windows" > "$PIXI_HOME"/config.toml
+    #     cat "$PIXI_HOME"/config.toml
     - name: OpenGL (Windows)
       if: inputs.opengl == 'true' && runner.os == 'Windows'
       shell: pwsh

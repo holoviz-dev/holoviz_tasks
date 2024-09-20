@@ -66,16 +66,14 @@ runs:
       with:
         drive-size: 5GB
         env-mapping: |
-          PIXI_CACHE_DIR,{{ DEV_DRIVE }}/.cache/package
-          PIP_CACHE_DIR,{{ DEV_DRIVE }}/.cache/pip
-    - name: Setup external pixi environment
+          PIXI_CACHE_DIR,{{ DEV_DRIVE }}/pixi
+          PIP_CACHE_DIR,{{ DEV_DRIVE }}/pip
+    - name: Setup dev drive environment (Windows)
       if: runner.os == 'Windows'
       shell: bash -l {0}
       run: |
         mkdir -p .pixi
-        ls .pixi
         echo 'detached-environments = true' > .pixi/config.toml
-        cat .pixi/config.toml
     - name: OpenGL (Windows)
       if: inputs.opengl == 'true' && runner.os == 'Windows'
       shell: pwsh

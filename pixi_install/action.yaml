@@ -60,6 +60,15 @@ runs:
         echo "NUMEXPR_NUM_THREADS=1" >> $GITHUB_ENV
         # This is to avoid warnings for debugpy on newer versions of Python
         echo "PYDEVD_DISABLE_FILE_VALIDATION=1" >> $GITHUB_ENV
+    - name: Setup Dev Drive (Windows)
+      if: runner.os == 'Windows'
+      uses: samypr100/setup-dev-drive@v3
+      with:
+        drive-size: 5GB
+        env-mapping: |
+          PIXI_HOME,{{ DEV_DRIVE }}/.pixi
+          PACKAGE_CACHE_DIR,{{ DEV_DRIVE }}/.cache/package
+          REPODATA_CACHE_DIR,{{ DEV_DRIVE }}/.cache/repo
     - name: OpenGL (Windows)
       if: inputs.opengl == 'true' && runner.os == 'Windows'
       shell: pwsh

@@ -68,6 +68,7 @@ runs:
         env-mapping: |
           PIXI_CACHE_DIR,{{ DEV_DRIVE }}/pixi
           PIP_CACHE_DIR,{{ DEV_DRIVE }}/pip
+          NUMBA_CACHE_DIR,{{ DEV_DRIVE }}/numba
     - name: Setup dev drive environment (Windows)
       if: runner.os == 'Windows'
       shell: bash -l {0}

@@ -64,7 +64,7 @@ runs:
       if: runner.os == 'Windows'
       uses: samypr100/setup-dev-drive@v3
       with:
-        drive-size: 5GB
+        drive-size: 10GB
         env-mapping: |
           PIXI_CACHE_DIR,{{ DEV_DRIVE }}/pixi
           PIP_CACHE_DIR,{{ DEV_DRIVE }}/pip

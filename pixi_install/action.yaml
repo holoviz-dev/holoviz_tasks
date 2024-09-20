@@ -70,19 +70,12 @@ runs:
           PIXI_HOME,{{ DEV_DRIVE }}/.pixi
           PIXI_CACHE_DIR,{{ DEV_DRIVE }}/.cache/package
           PIP_CACHE_DIR,{{ DEV_DRIVE }}/.cache/pip
-          GITHUB_WORKSPACE,{{ DEV_DRIVE }}/holoviews
     - name: Setup external pixi environment
       if: runner.os == 'Windows'
-      shell: bash -l {0}
+      shell: pwsh
       run:
-        pwd
-    # - name: Setup external pixi environment
-    #   if: runner.os == 'Windows'
-    #   shell: pwsh
-    #   run:
-    #
-    #     echo "detached-environments=$PIXI_HOME/windows" > "$PIXI_HOME"/config.toml
-    #     cat "$PIXI_HOME"/config.toml
+        echo "detached-environments=$DEV_DRIVE/envs" > "$PIXI_HOME"/config.toml
+        cat "$PIXI_HOME"/config.toml
     - name: OpenGL (Windows)
       if: inputs.opengl == 'true' && runner.os == 'Windows'
       shell: pwsh

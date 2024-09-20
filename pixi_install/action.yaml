@@ -31,7 +31,7 @@ inputs:
   opengl:
     description: Whether to install openGL
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
   using: "composite"
@@ -65,17 +65,17 @@ runs:
       uses: samypr100/setup-dev-drive@v3
       with:
         drive-size: 5GB
-        workspace-copy: true
         env-mapping: |
-          PIXI_HOME,{{ DEV_DRIVE }}/.pixi
           PIXI_CACHE_DIR,{{ DEV_DRIVE }}/.cache/package
           PIP_CACHE_DIR,{{ DEV_DRIVE }}/.cache/pip
     - name: Setup external pixi environment
       if: runner.os == 'Windows'
-      shell: pwsh
-      run:
-        echo "detached-environments=$DEV_DRIVE/envs" > "$PIXI_HOME"/config.toml
-        cat "$PIXI_HOME"/config.toml
+      shell: bash -l {0}
+      run: |
+        mkdir -p .pixi
+        ls .pixi
+        echo 'detached-environments = true' > .pixi/config.toml
+        cat .pixi/config.toml
     - name: OpenGL (Windows)
       if: inputs.opengl == 'true' && runner.os == 'Windows'
       shell: pwsh
@@ -93,7 +93,7 @@ runs:
         sleep 3
         echo "::endgroup::"
     - uses: actions/download-artifact@v4
-      continue-on-error: true  # No artifact from pixi_lock action
+      continue-on-error: true # No artifact from pixi_lock action
       with:
         name: pixi-lock
         path: .
@@ -103,7 +103,7 @@ runs:
         manifest-path: ${{ inputs.pixi-manifest-path }}
         environments: ${{ inputs.environments }}
         activate-environment: ${{ inputs.pixi-activate-environment }}
-        cache: false  # Cache is slower than downloading!
+        cache: false # Cache is slower than downloading!
     - name: Temporary fix for macOS # https://github.com/actions/runner-images/issues/10624
       shell: bash -l {0}
       if: runner.os == 'macOS'

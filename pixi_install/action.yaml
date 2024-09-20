@@ -105,9 +105,7 @@ runs:
       run: |
         echo "::group::Download data"
         # INFO: Does not really work with environments as it can be multiple but good enough
-        pixi run -e ${{ inputs.environments }} download-data || echo "No download-data task"
-        # Does not work right now on gpu with linux
-        # if pixi task list -e ${{ inputs.environments }} 2>&1 | grep "download-data"; then
-        #   pixi run -e ${{ inputs.environments }} download-data
-        # fi
+        if pixi task list -e ${{ inputs.environments }} 2>&1 | grep "download-data"; then
+          pixi run -e ${{ inputs.environments }} download-data
+        fi
         echo "::endgroup::"

@@ -70,6 +70,7 @@ runs:
           PIP_CACHE_DIR,{{ DEV_DRIVE }}/pip
           NUMBA_CACHE_DIR,{{ DEV_DRIVE }}/numba
           PLAYWRIGHT_BROWSERS_PATH,{{ DEV_DRIVE }}/playwright
+          npm_config_cache,{{ DEV_DRIVE }}/npm
     - name: Setup dev drive environment (Windows)
       if: runner.os == 'Windows'
       shell: bash -l {0}

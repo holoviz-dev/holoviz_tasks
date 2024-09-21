@@ -69,6 +69,7 @@ runs:
           PIXI_CACHE_DIR,{{ DEV_DRIVE }}/pixi
           PIP_CACHE_DIR,{{ DEV_DRIVE }}/pip
           NUMBA_CACHE_DIR,{{ DEV_DRIVE }}/numba
+          PLAYWRIGHT_BROWSERS_PATH,{{ DEV_DRIVE }}/playwright
     - name: Setup dev drive environment (Windows)
       if: runner.os == 'Windows'
       shell: bash -l {0}

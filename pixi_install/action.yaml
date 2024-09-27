@@ -88,10 +88,6 @@ runs:
         environments: ${{ inputs.environments }}
         activate-environment: ${{ inputs.pixi-activate-environment }}
         cache: false  # Cache is slower than downloading!
-    - name: Temporary fix for macOS # https://github.com/actions/runner-images/issues/10624
-      shell: bash -l {0}
-      if: runner.os == 'macOS'
-      run: sed -i '' '/ export PATH;$/,+2d' ~/.bashrc || true
     - name: Install step
       if: ${{ inputs.install == 'true' }}
       shell: bash -e {0}

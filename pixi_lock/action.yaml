@@ -16,7 +16,7 @@ runs:
   using: "composite"
   steps:
     - name: Set TODAY
-      shell: bash -l {0}
+      shell: bash -e {0}
       run: |
         echo "TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
     - uses: actions/checkout@v4

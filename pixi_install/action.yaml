@@ -60,22 +60,9 @@ runs:
         echo "NUMEXPR_NUM_THREADS=1" >> $GITHUB_ENV
         # This is to avoid warnings for debugpy on newer versions of Python
         echo "PYDEVD_DISABLE_FILE_VALIDATION=1" >> $GITHUB_ENV
-    - name: OpenGL (Windows)
-      if: inputs.opengl == 'true' && runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        echo "::group::Install OpenGL"
-        powershell ${{ github.action_path }}/install_opengl.ps1
-        echo "::endgroup::"
-    - name: OpenGL (Linux)
-      if: inputs.opengl == 'true' && runner.os == 'Linux'
-      shell: bash -e {0}
-      run: |
-        echo "::group::Install OpenGL"
-        sudo apt-get install libglu1-mesa
-        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x24
-        sleep 3
-        echo "::endgroup::"
+    - name: OpenGL
+      if: inputs.opengl == 'true'
+      uses: pyvista/setup-headless-display-action@v2
     - uses: actions/download-artifact@v4
       continue-on-error: true  # No artifact from pixi_lock action
       with:

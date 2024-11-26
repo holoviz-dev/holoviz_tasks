@@ -34,6 +34,7 @@ runs:
       with:
         pixi-version: ${{ inputs.pixi-version }}
         manifest-path: ${{ inputs.pixi-manifest-path }}
+        run-install: false
     - uses: actions/upload-artifact@v4
       with:
         name: pixi-lock

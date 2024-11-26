@@ -36,6 +36,7 @@ runs:
         run-install: false
     - name: Run update  # So we don't need to download default
       if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash -e {0}
       run: |
         echo "::group::Update"
         pixi update

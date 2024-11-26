@@ -30,11 +30,16 @@ runs:
         key: pixi|${{ env.TODAY }}|${{ hashFiles('pixi.toml') }}
     - uses: prefix-dev/setup-pixi@v0.8.1
       if: steps.cache.outputs.cache-hit != 'true'
-      id: install
       with:
         pixi-version: ${{ inputs.pixi-version }}
         manifest-path: ${{ inputs.pixi-manifest-path }}
         run-install: false
+    - name: Run update  # So we don't need to download default
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        echo "::group::Update"
+        pixi update
+        echo "::endgroup::"
     - uses: actions/upload-artifact@v4
       with:
         name: pixi-lock

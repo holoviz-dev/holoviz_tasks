@@ -34,7 +34,7 @@ runs:
         pixi-version: ${{ inputs.pixi-version }}
         manifest-path: ${{ inputs.pixi-manifest-path }}
         run-install: false
-    - name: Run update  # So we don't need to download default
+    - name: Run update  # Using `pixi update` so we don't need to create and download the default environment.
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash -e {0}
       run: |

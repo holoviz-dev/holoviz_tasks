@@ -34,12 +34,12 @@ runs:
         pixi-version: ${{ inputs.pixi-version }}
         manifest-path: ${{ inputs.pixi-manifest-path }}
         run-install: false
-    - name: Run update  # Using `pixi update` so we don't need to create and download the default environment.
+    - name: Lock
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash -e {0}
       run: |
-        echo "::group::Update"
-        pixi update
+        echo "::group::Lock"
+        pixi list --no-install
         echo "::endgroup::"
     - uses: actions/upload-artifact@v4
       with:

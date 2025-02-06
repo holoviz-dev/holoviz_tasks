@@ -39,7 +39,7 @@ runs:
       shell: bash -e {0}
       run: |
         echo "::group::Lock"
-        pixi list --no-install --color=always
+        pixi lock --color=always
         echo "::endgroup::"
     - uses: actions/upload-artifact@v4
       with:

@@ -2,42 +2,14 @@ name: Docs publish
 description: Publish docs to AWS
 inputs:
   url:
-    description: The URL to the S3 bucket
+    description: The URL to the S3 bucket, no trailing slash
+    required: true
+  cloudfront_id:
+    description: The cloudfront id
     required: true
   path:
     description: The folder to upload
     default: ./builtdocs/
-  # cloudfront_id:
-  #   description: The folder to upload
-  #   default: ./builtdocs/
-
-  # aws-access-key:
-  #   description: If the action should run `pixi run install`
-  #   required: false
-  # download-data:
-  #   description: If the action should run `pixi run download-data`
-  #   required: false
-  #   default: true
-  # pixi-version:
-  #   description: The version of pixi to use
-  #   required: false
-  # pixi-manifest-path:
-  #   description: The path to the pixi manifest file
-  #   required: false
-  # pixi-activate-environment:
-  #   description: |
-  #     If the installed environment should be "activated" for the current job, modifying `$GITHUB_ENV` and
-  #     `$GITHUB_PATH`. If more than one environment is specified in `environments`, this must be the name of the
-  #     environment. Defaults to `false`. Requires at least pixi v0.21.0.
-  #   required: false
-  # environment_variables:
-  #   description: Whether to add global environment variables
-  #   required: false
-  #   default: true
-  # opengl:
-  #   description: Whether to install openGL
-  #   required: false
-  #   default: "false"
 
 runs:
   using: "composite"
@@ -45,6 +17,7 @@ runs:
     - shell: bash -e {0}
       id: vars
       run: |
+        echo "Deploying from ref ${GITHUB_REF#refs/*/}"
         echo "tag=${GITHUB_REF#refs/*/}" > $GITHUB_OUTPUT
     - name: upload dev
       shell: bash -e {0}
@@ -52,20 +25,24 @@ runs:
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
         (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       run: |
-        echo "DEV"
+        echo "::group::aws sync (dev)"
         aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/dev"
+        echo "::endgroup::"
     - name: upload main
       shell: bash -e {0}
       if: |
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
         (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       run: |
+        echo "::group::aws sync (main)"
         echo "MAIN"
         # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest"
         # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/${{ steps.vars.output.tag }}"
+        echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun'
       run: |
-        echo "DRYRUN"
+        echo "::group::aws sync (dryrun)"
         aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest"
+        echo "::endgroup::"

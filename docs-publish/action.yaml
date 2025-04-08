@@ -7,7 +7,7 @@ inputs:
   path:
     description: The folder to upload
     default: ./builtdocs/
-  # cloudflare_id:
+  # cloudfront_id:
   #   description: The folder to upload
   #   default: ./builtdocs/
 
@@ -46,20 +46,14 @@ runs:
       id: vars
       run: |
         echo "tag=${GITHUB_REF#refs/*/}" > $GITHUB_OUTPUT
-        echo ${{ inputs.path }}
-        ls ${{ inputs.path }}
-        echo ${{ inputs.target }}
-        echo ${{ github.event_name }}
-        echo ${{ github.event.inputs.target }}
-        echo ${{ inputs.url }}
     - name: upload dev
       shell: bash -e {0}
       if: |
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
         (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       run: |
-        # aws s3 sync --delete ./builtdocs s3://dev.holoviews.org/
         echo "DEV"
+        aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/dev"
     - name: upload main
       shell: bash -e {0}
       if: |
@@ -67,10 +61,11 @@ runs:
         (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       run: |
         echo "MAIN"
-        # aws s3 sync --delete ./builtdocs s3://holoviews.org/
+        # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest"
+        # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/${{ steps.vars.output.tag }}"
     - name: dryrun
       shell: bash -e {0}
-      if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun')
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun'
       run: |
         echo "DRYRUN"
-        # aws s3 sync --delete --dryrun ./builtdocs s3://holoviews.org/
+        aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest"

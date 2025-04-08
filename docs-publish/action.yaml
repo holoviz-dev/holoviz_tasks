@@ -51,10 +51,10 @@ runs:
     - shell: bash -e {0}
       run: |
         echo "tag=${GITHUB_REF#refs/*/}"
-      # echo ${{ inputs.path }}
-      # ls ${{ inputs.path }}
-      # echo ${{ inputs.target }}
-      # echo ${{ inputs.tag }}
+        echo ${{ inputs.path }}
+        ls ${{ inputs.path }}
+        echo ${{ inputs.target }}
+        echo ${{ inputs.tag }}
     # - name:
     # - name: Test
     #   id: vars

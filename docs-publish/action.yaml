@@ -48,22 +48,29 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # - name: Set target
-    #   id: vars
-    #   run: echo "tag=${{ needs.docs_build.outputs.tag }}" >> $GITHUB_OUTPUT
+    - shell: bash -e {0}
+      run: |
+        echo "tag=${GITHUB_REF#refs/*/}"
+      # echo ${{ inputs.path }}
+      # ls ${{ inputs.path }}
+      # echo ${{ inputs.target }}
+      # echo ${{ inputs.tag }}
     # - name:
-    - name: upload dev
-      if: |
-        (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
-        (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
-      run: |
-        # aws s3 sync --delete ./builtdocs s3://dev.holoviews.org/
-        echo "DEV"
-        ls ${{ inputs.path }}
-    - name: upload main
-      if: |
-        (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
-        (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
-      run: |
-        echo "main"
-        # aws s3 sync --delete ./builtdocs s3://holoviews.org/
+    # - name: Test
+    #   id: vars
+    # - name: upload dev
+    #   shell: bash -e {0}
+    #   if: |
+    #     (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
+    #     (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+    #   run: |
+    #     # aws s3 sync --delete ./builtdocs s3://dev.holoviews.org/
+    #     echo "DEV"
+    # - name: upload main
+    #   shell: bash -e {0}
+    #   if: |
+    #     (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
+    #     (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+    #   run: |
+    #     echo "main"
+    #     # aws s3 sync --delete ./builtdocs s3://holoviews.org/

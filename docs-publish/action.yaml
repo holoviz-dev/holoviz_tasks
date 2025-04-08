@@ -1,0 +1,69 @@
+name: Docs publish
+description: Publish docs to AWS
+inputs:
+  path:
+    description: environments to install
+    default: builtdocs/
+  target:
+    description: "Site to build and deploy"
+    type: choice
+    options:
+      - dev
+      - main
+      - dryrun
+    required: true
+    default: dryrun
+  tag:
+    description: "Tag to build and deploy"
+    type: string
+    required: true
+  # aws-access-key:
+  #   description: If the action should run `pixi run install`
+  #   required: false
+  # download-data:
+  #   description: If the action should run `pixi run download-data`
+  #   required: false
+  #   default: true
+  # pixi-version:
+  #   description: The version of pixi to use
+  #   required: false
+  # pixi-manifest-path:
+  #   description: The path to the pixi manifest file
+  #   required: false
+  # pixi-activate-environment:
+  #   description: |
+  #     If the installed environment should be "activated" for the current job, modifying `$GITHUB_ENV` and
+  #     `$GITHUB_PATH`. If more than one environment is specified in `environments`, this must be the name of the
+  #     environment. Defaults to `false`. Requires at least pixi v0.21.0.
+  #   required: false
+  # environment_variables:
+  #   description: Whether to add global environment variables
+  #   required: false
+  #   default: true
+  # opengl:
+  #   description: Whether to install openGL
+  #   required: false
+  #   default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    # - name: Set target
+    #   id: vars
+    #   run: echo "tag=${{ needs.docs_build.outputs.tag }}" >> $GITHUB_OUTPUT
+    # - name:
+    - name: upload dev
+      if: |
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
+        (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+      run: |
+        # aws s3 sync --delete ./builtdocs s3://dev.holoviews.org/
+        echo "DEV"
+        ls ${{ inputs.path }}
+    - name: upload main
+      if: |
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
+        (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+      run: |
+        echo "main"
+        # aws s3 sync --delete ./builtdocs s3://holoviews.org/

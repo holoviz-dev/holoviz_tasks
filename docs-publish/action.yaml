@@ -13,10 +13,6 @@ inputs:
       - dryrun
     required: true
     default: dryrun
-  tag:
-    description: "Tag to build and deploy"
-    type: string
-    required: true
   # aws-access-key:
   #   description: If the action should run `pixi run install`
   #   required: false
@@ -49,12 +45,14 @@ runs:
   using: "composite"
   steps:
     - shell: bash -e {0}
+      id: vars
       run: |
-        echo "tag=${GITHUB_REF#refs/*/}"
+        echo "tag=${GITHUB_REF#refs/*/}" > $GITHUB_OUTPUT
         echo ${{ inputs.path }}
         ls ${{ inputs.path }}
         echo ${{ inputs.target }}
-        echo ${{ inputs.tag }}
+        echo ${{ github.event_name }}
+        echo ${{ github.event.inputs.target }}
     # - name:
     # - name: Test
     #   id: vars

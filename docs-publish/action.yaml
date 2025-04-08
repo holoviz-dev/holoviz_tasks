@@ -1,18 +1,16 @@
 name: Docs publish
 description: Publish docs to AWS
 inputs:
-  path:
-    description: environments to install
-    default: builtdocs/
-  target:
-    description: "Site to build and deploy"
-    type: choice
-    options:
-      - dev
-      - main
-      - dryrun
+  url:
+    description: The URL to the S3 bucket
     required: true
-    default: dryrun
+  path:
+    description: The folder to upload
+    default: ./builtdocs/
+  # cloudflare_id:
+  #   description: The folder to upload
+  #   default: ./builtdocs/
+
   # aws-access-key:
   #   description: If the action should run `pixi run install`
   #   required: false
@@ -53,22 +51,26 @@ runs:
         echo ${{ inputs.target }}
         echo ${{ github.event_name }}
         echo ${{ github.event.inputs.target }}
-    # - name:
-    # - name: Test
-    #   id: vars
-    # - name: upload dev
-    #   shell: bash -e {0}
-    #   if: |
-    #     (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
-    #     (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
-    #   run: |
-    #     # aws s3 sync --delete ./builtdocs s3://dev.holoviews.org/
-    #     echo "DEV"
-    # - name: upload main
-    #   shell: bash -e {0}
-    #   if: |
-    #     (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
-    #     (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
-    #   run: |
-    #     echo "main"
-    #     # aws s3 sync --delete ./builtdocs s3://holoviews.org/
+        echo ${{ inputs.url }}
+    - name: upload dev
+      shell: bash -e {0}
+      if: |
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
+        (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+      run: |
+        # aws s3 sync --delete ./builtdocs s3://dev.holoviews.org/
+        echo "DEV"
+    - name: upload main
+      shell: bash -e {0}
+      if: |
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
+        (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+      run: |
+        echo "MAIN"
+        # aws s3 sync --delete ./builtdocs s3://holoviews.org/
+    - name: dryrun
+      shell: bash -e {0}
+      if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun')
+      run: |
+        echo "DRYRUN"
+        # aws s3 sync --delete --dryrun ./builtdocs s3://holoviews.org/

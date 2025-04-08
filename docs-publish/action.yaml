@@ -25,8 +25,9 @@ runs:
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
         (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       run: |
-        echo "::group::aws sync (dev)"
+        echo "::group::Upload dev"
         aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/dev"
+        aws cloudfront create-invalidation --distribution-id "${{ inputs.cloudfront_id }}" --paths "/en/docs/dev*"
         echo "::endgroup::"
     - name: upload main
       shell: bash -e {0}
@@ -34,15 +35,16 @@ runs:
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
         (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       run: |
-        echo "::group::aws sync (main)"
+        echo "::group::Upload main"
         echo "MAIN"
         # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest"
+        # TODO: Version should work with workflow dispatch
         # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/${{ steps.vars.output.tag }}"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun'
       run: |
-        echo "::group::aws sync (dryrun)"
+        echo "::group::Dryrun"
         aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest"
         echo "::endgroup::"

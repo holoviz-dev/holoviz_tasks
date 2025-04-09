@@ -52,7 +52,7 @@ runs:
         SWITCHER_PATH: "${{ inputs.switcher_path }}"
         S3_URL: "${{ inputs.url }}"
         CLOUDFRONT_ID: "${{ inputs.cloudfront_id }}"
-        VERSION: "${{ inputs.version }}"
+        VERSION: "${{ inputs.version if github.event_name == 'workflow_dispatch' else steps.vars.outputs.tag }}"
       run: |
         echo "::group::Upload main"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public

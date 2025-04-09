@@ -37,7 +37,7 @@ runs:
         CLOUDFRONT_ID: "${{ inputs.cloudfront_id }}"
       run: |
         echo "::group::Upload dev"
-        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev" --cache-control max-age=$YEAR_CACHE,public
+        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev/" --cache-control max-age=$YEAR_CACHE,public
         aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/dev*"
         echo "::endgroup::"
     - name: main
@@ -55,8 +55,8 @@ runs:
         VERSION: "${{ inputs.version }}"
       run: |
         echo "::group::Upload main"
-        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest" --cache-control max-age=$WEEK_CACHE,public
-        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/$VERSION" --cache-control max-age=$YEAR_CACHE,public
+        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public
+        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/$VERSION/" --cache-control max-age=$YEAR_CACHE,public
         aws s3 cp "$BUILD_PATH$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
         aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
         echo "::endgroup::"
@@ -68,5 +68,5 @@ runs:
         S3_URL: "${{ inputs.url }}"
       run: |
         echo "::group::Dryrun"
-        aws s3 sync --delete --dryrun "$BUILD_PATH" "$S3_URL/en/docs/latest"
+        aws s3 sync --delete --dryrun "$BUILD_PATH" "$S3_URL/en/docs/latest/"
         echo "::endgroup::"

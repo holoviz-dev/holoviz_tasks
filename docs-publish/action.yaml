@@ -8,7 +8,7 @@ inputs:
     description: The cloudfront id
     required: true
   version:
-    description: The full version of the package
+    description: The version (only if target is main)
     required: true
   path:
     description: The folder to upload
@@ -20,17 +20,18 @@ runs:
     - shell: bash -e {0}
       id: vars
       run: |
-        echo "Deploying from ref ${GITHUB_REF#refs/*/}"
+        echo "Deploying from ref: ${GITHUB_REF#refs/*/}"
         echo "tag=${GITHUB_REF#refs/*/}" > $GITHUB_OUTPUT
-        echo "version=${{ inputs.version }}"
     - name: dev
       shell: bash -e {0}
       if: |
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
         (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+      env:
+        WEEK_CACHE: "315360" # 3600 * 24 * 7
       run: |
         echo "::group::Upload dev"
-        aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/dev"
+        aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/dev" --cache-control max-age=$YEAR_CACHE,public
         aws cloudfront create-invalidation --distribution-id "${{ inputs.cloudfront_id }}" --paths "/en/docs/dev*"
         echo "::endgroup::"
     - name: main
@@ -38,12 +39,14 @@ runs:
       if: |
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
         (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
+      env:
+        WEEK_CACHE: "315360" # 3600 * 24 * 7
+        YEAR_CACHE: "31536000" # 3600 * 24 * 365
       run: |
         echo "::group::Upload main"
-        echo "MAIN"
-        # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest"
-        # TODO: Version should work with workflow dispatch
-        # aws s3 sync --delete --dryrun "${{ inputs.path }}" "${{ inputs.url }}/en/docs/${{ inputs.version }}"
+        aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest" --cache-control max-age=$WEEK_CACHE,public
+        aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/${{ inputs.version }}" --cache-control max-age=$YEAR_CACHE,public
+        aws cloudfront create-invalidation --distribution-id "${{ inputs.cloudfront_id }}" --paths "/en/docs/latest*" "/en/docs/${{ inputs.version }}"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}

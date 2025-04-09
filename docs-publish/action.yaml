@@ -56,9 +56,9 @@ runs:
       run: |
         echo "::group::Upload main"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public
-        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/$VERSION/" --cache-control max-age=$YEAR_CACHE,public
+        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/v$VERSION/" --cache-control max-age=$YEAR_CACHE,public
         aws s3 cp "$BUILD_PATH$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
-        aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
+        aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/v$VERSION*" "/switcher.json"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}

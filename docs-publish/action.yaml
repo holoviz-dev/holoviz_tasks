@@ -52,13 +52,19 @@ runs:
         SWITCHER_PATH: "${{ inputs.switcher_path }}"
         S3_URL: "${{ inputs.url }}"
         CLOUDFRONT_ID: "${{ inputs.cloudfront_id }}"
-        VERSION: "${{ inputs.version if github.event_name == 'workflow_dispatch' else steps.vars.outputs.tag }}"
+        INPUT_VERSION: "${{ inputs.version }}"
+        TAG_VERSION: "${{ steps.vars.outputs.tag }}"
       run: |
         echo "::group::Upload main"
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION=$INPUT_VERSION
+        else
+          VERSION=$TAG_VERSION
+        fi
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public
-        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/v$VERSION/" --cache-control max-age=$YEAR_CACHE,public
+        aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/$VERSION/" --cache-control max-age=$YEAR_CACHE,public
         aws s3 cp "$BUILD_PATH$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
-        aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/v$VERSION*" "/switcher.json"
+        aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}

@@ -11,7 +11,7 @@ inputs:
     description: The version (only if target is main)
     required: true
   path:
-    description: The folder to upload
+    description: The directory to upload
     default: ./builtdocs/
 
 runs:
@@ -45,8 +45,8 @@ runs:
       run: |
         echo "::group::Upload main"
         aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/latest" --cache-control max-age=$WEEK_CACHE,public
-        aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/${{ inputs.version }}" --cache-control max-age=$YEAR_CACHE,public
-        aws cloudfront create-invalidation --distribution-id "${{ inputs.cloudfront_id }}" --paths "/en/docs/latest*" "/en/docs/${{ inputs.version }}"
+        # aws s3 sync --delete "${{ inputs.path }}" "${{ inputs.url }}/en/docs/${{ inputs.version }}" --cache-control max-age=$YEAR_CACHE,public
+        aws cloudfront create-invalidation --distribution-id "${{ inputs.cloudfront_id }}" --paths "/en/docs/latest*" "/en/docs/${{ inputs.version }}*"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}

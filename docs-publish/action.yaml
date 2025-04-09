@@ -14,8 +14,8 @@ inputs:
     description: The directory to upload
     default: ./builtdocs/
   switcher_path:
-    description: The path to the switcher.json relative to the build_path
-    default: _static/switcher.json
+    description: The path to the switcher.json
+    default: ./builtdocs/_static/switcher.json
 
 runs:
   using: "composite"
@@ -63,7 +63,7 @@ runs:
         fi
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/$VERSION/" --cache-control max-age=$YEAR_CACHE,public
-        aws s3 cp "$BUILD_PATH$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        aws s3 cp "$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
         aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
         echo "::endgroup::"
     - name: dryrun

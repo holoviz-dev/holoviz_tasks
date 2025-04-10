@@ -1,20 +1,26 @@
-name: Docs publish
+name: Publish documentation
 description: Publish docs to AWS
 inputs:
-  url:
-    description: The URL to the S3 bucket, no trailing slash
+  s3-url:
+    description: The URL to the S3 bucket, no trailing slash.
     required: true
-  cloudfront_id:
-    description: The cloudfront id
+  s3-access-key-id:
+    description: Access key ID to use for S3 authentication.
+    required: true
+  s3-secret-access-key:
+    description: Secret access key to use for S3 authentication.
+    required: true
+  s3-cloudfront-id:
+    description: The S3 cloudfront id.
     required: true
   version:
-    description: The version (only if target is main)
+    description: The version (only if target is main).
     required: true
-  build_path:
-    description: The directory to upload
+  build-path:
+    description: The directory to upload.
     default: ./builtdocs/
-  switcher_path:
-    description: The path to the switcher.json
+  switcher-path:
+    description: The path to the switcher.json file.
     default: ./builtdocs/_static/switcher.json
 
 runs:
@@ -32,14 +38,16 @@ runs:
         (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       env:
         WEEK_CACHE: "315360" # 3600 * 24 * 7
-        BUILD_PATH: "${{ inputs.build_path }}"
-        S3_URL: "${{ inputs.url }}"
-        CLOUDFRONT_ID: "${{ inputs.cloudfront_id }}"
+        BUILD_PATH: "${{ inputs.build-path }}"
+        S3_URL: "${{ inputs.s3-url }}"
+        S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
+        AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
       run: |
         echo "::group::Upload dev"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev/" --cache-control max-age=$YEAR_CACHE,public
-        aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/dev*"
         echo "::endgroup::"
+        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/dev*"
     - name: main
       shell: bash -e {0}
       if: |
@@ -48,30 +56,39 @@ runs:
       env:
         WEEK_CACHE: "315360" # 3600 * 24 * 7
         YEAR_CACHE: "31536000" # 3600 * 24 * 365
-        BUILD_PATH: "${{ inputs.build_path }}"
-        SWITCHER_PATH: "${{ inputs.switcher_path }}"
-        S3_URL: "${{ inputs.url }}"
-        CLOUDFRONT_ID: "${{ inputs.cloudfront_id }}"
+        BUILD_PATH: "${{ inputs.build-path }}"
+        SWITCHER_PATH: "${{ inputs.switcher-path }}"
+        S3_URL: "${{ inputs.s3-url }}"
+        S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
+        AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
         INPUT_VERSION: "${{ inputs.version }}"
         TAG_VERSION: "${{ steps.vars.outputs.tag }}"
+        GH_EVENT_NAME: "${{ github.event_name }}"
       run: |
-        echo "::group::Upload main"
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          VERSION=$INPUT_VERSION
+        if [ "$GH_EVENT_NAME" = "workflow_dispatch" ]; then
+          VERSION="$INPUT_VERSION"
         else
-          VERSION=$TAG_VERSION
+          VERSION="$TAG_VERSION"
         fi
+        echo "Version is $VERSION"
+        echo "::group::Upload latest"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Upload $VERSION"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/$VERSION/" --cache-control max-age=$YEAR_CACHE,public
+        echo "::endgroup::"
         aws s3 cp "$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
-        aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
+        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun'
       env:
-        BUILD_PATH: "${{ inputs.build_path }}"
-        S3_URL: "${{ inputs.url }}"
+        BUILD_PATH: "${{ inputs.build-path }}"
+        S3_URL: "${{ inputs.s3-url }}"
+        AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
       run: |
         echo "::group::Dryrun"
         aws s3 sync --delete --dryrun "$BUILD_PATH" "$S3_URL/en/docs/latest/"

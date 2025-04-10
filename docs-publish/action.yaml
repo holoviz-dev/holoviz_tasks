@@ -47,7 +47,9 @@ runs:
         echo "::group::Upload dev"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev/" --cache-control max-age=$YEAR_CACHE,public
         echo "::endgroup::"
+        echo "::group::Invalidate cloudfront"
         aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/dev*"
+        echo "::endgroup::"
     - name: main
       shell: bash -e {0}
       if: |
@@ -71,14 +73,16 @@ runs:
         else
           VERSION="$TAG_VERSION"
         fi
-        echo "Version is $VERSION"
         echo "::group::Upload latest"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public
         echo "::endgroup::"
         echo "::group::Upload $VERSION"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/$VERSION/" --cache-control max-age=$YEAR_CACHE,public
         echo "::endgroup::"
+        echo "::group::Copy switcher.json"
         aws s3 cp "$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Invalidate cloudfront"
         aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
         echo "::endgroup::"
     - name: dryrun

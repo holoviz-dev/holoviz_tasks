@@ -44,6 +44,7 @@ runs:
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
       run: |
+        # Upload dev
         echo "::group::Upload dev"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev/" --cache-control max-age=$YEAR_CACHE,public
         echo "::endgroup::"
@@ -68,6 +69,7 @@ runs:
         TAG_VERSION: "${{ steps.vars.outputs.tag }}"
         GH_EVENT_NAME: "${{ github.event_name }}"
       run: |
+        # Upload main
         if [ "$GH_EVENT_NAME" = "workflow_dispatch" ]; then
           VERSION="$INPUT_VERSION"
         else
@@ -94,6 +96,7 @@ runs:
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
       run: |
+        # Dryrun
         echo "::group::Dryrun"
         aws s3 sync --delete --dryrun "$BUILD_PATH" "$S3_URL/en/docs/latest/"
         echo "::endgroup::"

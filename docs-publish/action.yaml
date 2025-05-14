@@ -37,7 +37,7 @@ runs:
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
         (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       env:
-        WEEK_CACHE: "315360" # 3600 * 24 * 7
+        YEAR_CACHE: "31536000" # 3600 * 24 * 365
         BUILD_PATH: "${{ inputs.build-path }}"
         S3_URL: "${{ inputs.s3-url }}"
         S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
@@ -57,7 +57,7 @@ runs:
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'main') ||
         (github.event_name == 'push' && !(contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       env:
-        WEEK_CACHE: "315360" # 3600 * 24 * 7
+        WEEK_CACHE: "604800" # 3600 * 24 * 7
         YEAR_CACHE: "31536000" # 3600 * 24 * 365
         BUILD_PATH: "${{ inputs.build-path }}"
         SWITCHER_PATH: "${{ inputs.switcher-path }}"

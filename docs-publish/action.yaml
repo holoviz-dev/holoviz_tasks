@@ -22,6 +22,12 @@ inputs:
   switcher-path:
     description: The path to the switcher.json file.
     default: ./builtdocs/_static/switcher.json
+  sitemap-path:
+    description: The path to the sitemap.xml file.
+    default: ./docs/_nbsite_versioned/sitemap.xml
+  robots-path:
+    description: The path to the robots.txt file.
+    default: ./docs/_nbsite_versioned/robots.txt
 
 runs:
   using: "composite"
@@ -61,6 +67,8 @@ runs:
         YEAR_CACHE: "31536000" # 3600 * 24 * 365
         BUILD_PATH: "${{ inputs.build-path }}"
         SWITCHER_PATH: "${{ inputs.switcher-path }}"
+        SITEMAP_PATH: "${{ inputs.sitemap-path }}"
+        ROBOTS_PATH: "${{ inputs.robots-path }}"
         S3_URL: "${{ inputs.s3-url }}"
         S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
@@ -84,8 +92,14 @@ runs:
         echo "::group::Copy switcher.json"
         aws s3 cp "$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
         echo "::endgroup::"
+        echo "::group::Copy sitemap.xml"
+        aws s3 cp "$SITEMAP_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Copy robots.txt"
+        aws s3 cp "$ROBOTS_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
-        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json"
+        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json" "/sitemap.xml" "/robots.txt"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}

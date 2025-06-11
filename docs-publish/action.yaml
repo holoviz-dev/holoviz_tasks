@@ -28,6 +28,9 @@ inputs:
   robots-path:
     description: The path to the robots.txt file.
     default: ./docs/_nbsite_versioned/robots.txt
+  error-404-path:
+    description: The path to the 404.html file.
+    default: ./docs/_nbsite_versioned/404.html
 
 runs:
   using: "composite"
@@ -69,6 +72,7 @@ runs:
         SWITCHER_PATH: "${{ inputs.switcher-path }}"
         SITEMAP_PATH: "${{ inputs.sitemap-path }}"
         ROBOTS_PATH: "${{ inputs.robots-path }}"
+        ERROR_404_PATH: "${{ inputs.error-404-path }}"
         S3_URL: "${{ inputs.s3-url }}"
         S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
@@ -100,11 +104,14 @@ runs:
         echo "::group::Copy robots.txt"
         aws s3 cp "$ROBOTS_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
         echo "::endgroup::"
+        echo "::group::Copy 404.html"
+        aws s3 cp "$ERROR_404_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
         echo "::group::Invoke site-directory-manifest lambda"
         aws lambda invoke --function-name site-directory-manifest --payload "{\"bucket":\"$BUCKET_NAME\"}" response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
-        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json" "/sitemap.xml" "/robots.txt"
+        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json" "/sitemap.xml" "/robots.txt" "/404.html"
         echo "::endgroup::"
     - name: dryrun
       shell: bash -e {0}

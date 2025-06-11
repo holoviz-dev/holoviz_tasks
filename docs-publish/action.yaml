@@ -83,6 +83,8 @@ runs:
         else
           VERSION="$TAG_VERSION"
         fi
+        # Remove s3://
+        BUCKET_NAME="${S3_URL:5}"
         echo "::group::Upload latest"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/latest/" --cache-control max-age=$WEEK_CACHE,public
         echo "::endgroup::"
@@ -97,6 +99,9 @@ runs:
         echo "::endgroup::"
         echo "::group::Copy robots.txt"
         aws s3 cp "$ROBOTS_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Invoke site-directory-manifest lambda"
+        aws lambda invoke --function-name site-directory-manifest --payload "{\"bucket":\"$BUCKET_NAME\"}" response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
         aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json" "/sitemap.xml" "/robots.txt"

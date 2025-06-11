@@ -54,8 +54,13 @@ runs:
         AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
       run: |
         # Upload dev
+        # Remove s3://
+        BUCKET_NAME="${S3_URL:5}"
         echo "::group::Upload dev"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev/" --cache-control max-age=$YEAR_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Invoke site-directory-manifest lambda"
+        aws lambda invoke --function-name site-directory-manifest --payload "{\"bucket":\"$BUCKET_NAME\"}" response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
         aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/dev*"

@@ -24,13 +24,13 @@ inputs:
     default: ./builtdocs/_static/switcher.json
   sitemap-path:
     description: The path to the sitemap.xml file.
-    default: ./docs/_nbsite_versioned/sitemap.xml
+    default: ./doc/_nbsite_versioned/sitemap.xml
   robots-path:
     description: The path to the robots.txt file.
-    default: ./docs/_nbsite_versioned/robots.txt
+    default: ./doc/_nbsite_versioned/robots.txt
   error-404-path:
     description: The path to the 404.html file.
-    default: ./docs/_nbsite_versioned/404.html
+    default: ./doc/_nbsite_versioned/404.html
 
 runs:
   using: "composite"

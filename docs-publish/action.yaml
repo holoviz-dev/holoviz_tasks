@@ -64,6 +64,7 @@ runs:
           --function-name site-directory-manifest \
           --payload "{\"bucket\":\"$BUCKET_NAME\"}" \
           --region us-east-1 \
+          --cli-binary-format raw-in-base64-out \
           response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
@@ -121,6 +122,7 @@ runs:
           --function-name site-directory-manifest \
           --payload "{\"bucket\":\"$BUCKET_NAME\"}" \
           --region us-east-1 \
+          --cli-binary-format raw-in-base64-out \
           response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"

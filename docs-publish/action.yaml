@@ -60,7 +60,11 @@ runs:
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev/" --cache-control max-age=$YEAR_CACHE,public
         echo "::endgroup::"
         echo "::group::Invoke site-directory-manifest lambda"
-        aws lambda invoke --function-name site-directory-manifest --payload "{\"bucket":\"$BUCKET_NAME\"}" response.json
+        aws lambda invoke \
+          --function-name site-directory-manifest \
+          --payload "{\"bucket\":\"$BUCKET_NAME\"}"
+          --region us-east-1 \\
+          response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
         aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/dev*"
@@ -113,7 +117,11 @@ runs:
         aws s3 cp "$ERROR_404_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
         echo "::endgroup::"
         echo "::group::Invoke site-directory-manifest lambda"
-        aws lambda invoke --function-name site-directory-manifest --payload "{\"bucket\":\"$BUCKET_NAME\"}" response.json
+        aws lambda invoke \
+          --function-name site-directory-manifest \
+          --payload "{\"bucket\":\"$BUCKET_NAME\"}"
+          --region us-east-1 \\
+          response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
         aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/latest*" "/en/docs/$VERSION*" "/switcher.json" "/sitemap.xml" "/robots.txt" "/404.html"

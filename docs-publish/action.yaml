@@ -52,6 +52,7 @@ runs:
         S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
+        AWS_DEFAULT_REGION: "us-east-1"
       run: |
         # Upload dev
         # Remove s3://
@@ -63,7 +64,6 @@ runs:
         aws lambda invoke \
           --function-name site-directory-manifest \
           --payload "{\"bucket\":\"$BUCKET_NAME\"}" \
-          --region us-east-1 \
           --cli-binary-format raw-in-base64-out \
           response.json
         echo "::endgroup::"
@@ -87,6 +87,7 @@ runs:
         S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
+        AWS_DEFAULT_REGION: "us-east-1"
         INPUT_VERSION: "${{ inputs.version }}"
         TAG_VERSION: "${{ steps.vars.outputs.tag }}"
         GH_EVENT_NAME: "${{ github.event_name }}"
@@ -121,7 +122,6 @@ runs:
         aws lambda invoke \
           --function-name site-directory-manifest \
           --payload "{\"bucket\":\"$BUCKET_NAME\"}" \
-          --region us-east-1 \
           --cli-binary-format raw-in-base64-out \
           response.json
         echo "::endgroup::"
@@ -136,6 +136,7 @@ runs:
         S3_URL: "${{ inputs.s3-url }}"
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
+        AWS_DEFAULT_REGION: "us-east-1"
       run: |
         # Dryrun
         echo "::group::Dryrun"

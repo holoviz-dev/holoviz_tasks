@@ -48,6 +48,10 @@ runs:
       env:
         YEAR_CACHE: "31536000" # 3600 * 24 * 365
         BUILD_PATH: "${{ inputs.build-path }}"
+        SWITCHER_PATH: "${{ inputs.switcher-path }}"
+        SITEMAP_PATH: "${{ inputs.sitemap-path }}"
+        ROBOTS_PATH: "${{ inputs.robots-path }}"
+        ERROR_404_PATH: "${{ inputs.error-404-path }}"
         S3_URL: "${{ inputs.s3-url }}"
         S3_CLOUDFRONT_ID: "${{ inputs.s3-cloudfront-id }}"
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
@@ -60,6 +64,18 @@ runs:
         echo "::group::Upload dev"
         aws s3 sync --delete "$BUILD_PATH" "$S3_URL/en/docs/dev/" --cache-control max-age=$YEAR_CACHE,public
         echo "::endgroup::"
+        echo "::group::Copy switcher.json"
+        aws s3 cp "$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Copy sitemap.xml"
+        aws s3 cp "$SITEMAP_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Copy robots.txt"
+        aws s3 cp "$ROBOTS_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+        echo "::group::Copy 404.html"
+        aws s3 cp "$ERROR_404_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
         echo "::group::Invoke site-directory-manifest lambda"
         aws lambda invoke \
           --function-name site-directory-manifest \
@@ -68,7 +84,7 @@ runs:
           response.json
         echo "::endgroup::"
         echo "::group::Invalidate cloudfront"
-        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/dev*"
+        aws cloudfront create-invalidation --distribution-id "$S3_CLOUDFRONT_ID" --paths "/en/docs/dev*" "/switcher.json" "/sitemap.xml" "/robots.txt" "/404.html"
         echo "::endgroup::"
     - name: main
       shell: bash -e {0}

@@ -172,12 +172,47 @@ runs:
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun'
       env:
         BUILD_PATH: "${{ inputs.build-path }}"
+        SWITCHER_PATH: "${{ inputs.switcher-path }}"
+        SITEMAP_PATH: "${{ inputs.sitemap-path }}"
+        ROBOTS_PATH: "${{ inputs.robots-path }}"
+        ERROR_404_PATH: "${{ inputs.error-404-path }}"
         S3_URL: "${{ inputs.s3-url }}"
         AWS_ACCESS_KEY_ID: ${{ inputs.s3-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.s3-secret-access-key }}
         AWS_DEFAULT_REGION: "us-east-1"
       run: |
-        # Dryrun
+        # Remove s3://
+        BUCKET_NAME="${S3_URL:5}"
+
+        echo "::group::Copy sitemap.xml"
+        aws s3 cp --dryrun "$SITEMAP_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+
+        echo "::group::Copy robots.txt"
+        aws s3 cp --dryrun "$ROBOTS_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+
+        echo "::group::Copy 404.html"
+        aws s3 cp --dryrun "$ERROR_404_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+
+        echo "::group::Remove local sitemap.xml, robots.txt and 404.html"
+        rm  "$SITEMAP_PATH" "$ROBOTS_PATH" "$ERROR_404_PATH"
+        echo "::endgroup::"
+
         echo "::group::Dryrun"
         aws s3 sync --delete --dryrun "$BUILD_PATH" "$S3_URL/en/docs/latest/"
+        echo "::endgroup::"
+
+        echo "::group::Copy switcher.json"
+        aws s3 cp --dryrun "$SWITCHER_PATH" "$S3_URL" --cache-control max-age=$WEEK_CACHE,public
+        echo "::endgroup::"
+
+        echo "::group::Invoke site-directory-manifest lambda"
+        aws lambda invoke \
+          --function-name site-directory-manifest \
+          --payload "{\"bucket\":\"$BUCKET_NAME\"}" \
+          --cli-binary-format raw-in-base64-out \
+          --invocation-type DryRun \
+          response.json
         echo "::endgroup::"

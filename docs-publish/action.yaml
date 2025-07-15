@@ -46,6 +46,7 @@ runs:
         (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev') ||
         (github.event_name == 'push' && (contains(steps.vars.outputs.tag, 'a') || contains(steps.vars.outputs.tag, 'b') || contains(steps.vars.outputs.tag, 'rc')))
       env:
+        WEEK_CACHE: "604800" # 3600 * 24 * 7
         YEAR_CACHE: "31536000" # 3600 * 24 * 365
         BUILD_PATH: "${{ inputs.build-path }}"
         SWITCHER_PATH: "${{ inputs.switcher-path }}"
@@ -171,6 +172,7 @@ runs:
       shell: bash -e {0}
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dryrun'
       env:
+        WEEK_CACHE: "604800" # 3600 * 24 * 7
         BUILD_PATH: "${{ inputs.build-path }}"
         SWITCHER_PATH: "${{ inputs.switcher-path }}"
         SITEMAP_PATH: "${{ inputs.sitemap-path }}"

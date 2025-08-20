@@ -124,7 +124,8 @@ runs:
         if [ "$GH_EVENT_NAME" = "workflow_dispatch" ]; then
           VERSION="$INPUT_VERSION"
         else
-          VERSION="$TAG_VERSION"
+          # Remove the "v" prefix
+          VERSION="${TAG_VERSION:1}"
         fi
         # Remove s3://
         BUCKET_NAME="${S3_URL:5}"

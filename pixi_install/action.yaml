@@ -81,7 +81,7 @@ runs:
       shell: bash -e {0}
       run: |
         echo "::group::pixi config"
-        pixi config set run-post-link-scripts insecure
+        pixi config set --local run-post-link-scripts insecure
         echo "::endgroup::"
     - name: Install step
       if: ${{ inputs.install == 'true' }}

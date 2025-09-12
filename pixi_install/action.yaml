@@ -70,6 +70,13 @@ runs:
       with:
         name: pixi-lock
         path: .
+    - name: pixi config
+      shell: bash -e {0}
+      run: |
+        echo "::group::pixi config"
+        mkdir ~/.pixi
+        echo 'run-post-link-scripts = "insecure"' > ~/.pixi/config.toml
+        echo "::endgroup::"
     - uses: prefix-dev/setup-pixi@v0.9.0
       with:
         pixi-version: ${{ inputs.pixi-version }}
@@ -77,12 +84,6 @@ runs:
         environments: ${{ inputs.environments }}
         activate-environment: ${{ inputs.pixi-activate-environment }}
         cache: false  # Cache is slower than downloading!
-    - name: pixi config
-      shell: bash -e {0}
-      run: |
-        echo "::group::pixi config"
-        pixi config set --local run-post-link-scripts insecure
-        echo "::endgroup::"
     - name: Install step
       if: ${{ inputs.install == 'true' }}
       shell: bash -e {0}

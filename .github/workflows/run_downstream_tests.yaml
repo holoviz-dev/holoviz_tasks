@@ -46,42 +46,37 @@ jobs:
       env:
         EVENT: ${{ toJSON( github.event ) }}
       run: echo "$EVENT"
-    - name: Install jq
-      run: sudo apt install -y jq
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       name: Checkout repo
       with:
         fetch-depth: "1"
     - name: Fetch tags
       run: git fetch --tags
-    - name: Get version from git tag
+    - name: Git Tag
       id: from_git
       run: |
         echo "version=$(git tag -l --sort=-creatordate | head -n 1 | cut -c 2-)" >> $GITHUB_OUTPUT
-    - uses: conda-incubator/setup-miniconda@v3
-      name: Install conda with miniconda
-      with:
-        miniconda-version: "latest"
-        auto-activate-base: true
-        activate-environment: ""
-    - name: Conda search this version
+    - name: Conda Version
       id: from_conda
-      shell: bash -l {0}
+      env:
+        PACKAGE: ${{ env.UPSTREAM_REPO }}
+        GIT_VERSION: ${{ steps.from_git.outputs.version }}
       run: |
-        # Use conda search to get metadata as json for a specific version.
+        # Use the anaconda.org API to check if the version is available on pyviz.
         # If it's not available then version will be set to null, otherwise
-        # it'll be set to the version found in the metadata, i.e. 1.12.1a1 (jq -r removes
-        # the surrounding quotes).
-        # Using only pyviz/label/dev for the search, since dev releases and releases can
-        # both be found in this channel.
-        echo "version=$(conda search --override-channels -c pyviz/label/dev '${{ env.UPSTREAM_REPO }}==${{ steps.from_git.outputs.version }}' --json | jq -r '.${{ env.UPSTREAM_REPO }}[0].version')"  >> $GITHUB_OUTPUT
-    - name: Print tag and conda version found
+        # it'll be set to the version found in the metadata, i.e. 1.12.1a1.
+        echo "version=$(curl -s "https://api.anaconda.org/release/pyviz/${PACKAGE}/${GIT_VERSION}" | jq -r '.distributions[0].version // "null"')" >> $GITHUB_OUTPUT
+    - name: Print git tag and conda version found
+      env:
+        GIT_VERSION: ${{ steps.from_git.outputs.version }}
+        CONDA_VERSION: ${{ steps.from_conda.outputs.version }}
       run: |
-        echo "git tag: ${{ steps.from_git.outputs.version }}"
-        echo "conda version: ${{ steps.from_conda.outputs.version }}"
+        echo "Git Tag:       $GIT_VERSION"
+        echo "Conda Version: $CONDA_VERSION"
     - name: Stop if git tag and conda version are different
       if: ${{ steps.from_git.outputs.version != steps.from_conda.outputs.version && github.event_name != 'workflow_dispatch' }}
       run: exit 1
+
   downstream_tests:
     needs: check_if_new_version_available
     runs-on: ubuntu-latest

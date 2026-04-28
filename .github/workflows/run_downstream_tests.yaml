@@ -30,6 +30,8 @@ on:
       ACCESS_TOKEN:
         required: true
 
+permissions: {}
+
 env:
   UPSTREAM_REPO: ${{ github.event.repository.name }}
 
@@ -50,6 +52,7 @@ jobs:
       name: Checkout repo
       with:
         fetch-depth: "1"
+        persist-credentials: false
     - name: Fetch tags
       run: git fetch --tags
     - name: Git Tag

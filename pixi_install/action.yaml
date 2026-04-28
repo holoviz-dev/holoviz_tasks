@@ -39,6 +39,7 @@ runs:
     - uses: actions/checkout@v6
       with:
         fetch-depth: "100"
+        persist-credentials: false
     - name: Fetching tags
       shell: bash -e {0}
       run: |
@@ -87,17 +88,21 @@ runs:
     - name: Install step
       if: ${{ inputs.install == 'true' }}
       shell: bash -e {0}
+      env:
+        ENVS: ${{ inputs.environments }}
       run: |
         echo "::group::Install"
-        pixi run -e ${{ inputs.environments }} install -v
+        pixi run -e ${ENVS} install -v
         echo "::endgroup::"
     - name: Download data
       if: ${{ inputs.download-data == 'true' }}
+      env:
+        ENVS: ${{ inputs.environments }}
       shell: bash -e {0}
       run: |
         echo "::group::Download data"
         # INFO: Does not really work with environments as it can be multiple but good enough
-        if pixi task list -e ${{ inputs.environments }} 2>&1 | grep "download-data"; then
-          pixi run -e ${{ inputs.environments }} download-data
+        if pixi task list -e ${ENVS} 2>&1 | grep "download-data"; then
+          pixi run -e ${ENVS} download-data
         fi
         echo "::endgroup::"

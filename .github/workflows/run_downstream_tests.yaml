@@ -32,6 +32,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   UPSTREAM_REPO: ${{ github.event.repository.name }}
 
@@ -81,6 +85,7 @@ jobs:
       run: exit 1
 
   downstream_tests:
+    name: Run downstream tests
     needs: check_if_new_version_available
     runs-on: ubuntu-latest
     strategy:

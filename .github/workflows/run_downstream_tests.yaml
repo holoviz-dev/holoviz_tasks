@@ -48,7 +48,7 @@ jobs:
       env:
         EVENT: ${{ toJSON( github.event ) }}
       run: echo "$EVENT"
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       name: Checkout repo
       with:
         fetch-depth: "1"
@@ -89,7 +89,7 @@ jobs:
     timeout-minutes: 240
     steps:
     - name: Trigger downstream test workflow and wait
-      uses: convictional/trigger-workflow-and-wait@v1.6.5
+      uses: convictional/trigger-workflow-and-wait@f69fa9eedd3c62a599220f4d5745230e237904be # v1.6.5
       with:
         owner: holoviz
         repo: ${{ matrix.downstream_repo }}

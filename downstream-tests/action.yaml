@@ -1,0 +1,58 @@
+name: Downstream Tests
+description: Check version availability on pyviz and trigger downstream tests
+inputs:
+  downstream_repo:
+    description: The downstream repo to test
+    required: true
+  github_token:
+    description: GitHub token with access to trigger workflows
+    required: true
+  client_payload:
+    description: JSON payload to pass to downstream tests
+    default: '{"target": "downstream", "cache": false}'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      with:
+        fetch-depth: "1"
+        persist-credentials: false
+    - name: Fetch tags
+      shell: bash
+      run: git fetch --tags
+    - name: Git Tag
+      id: from_git
+      shell: bash
+      run: echo "version=$(git tag -l --sort=-creatordate | head -n 1 | cut -c 2-)" >> $GITHUB_OUTPUT
+    - name: Conda Version
+      id: from_conda
+      shell: bash
+      env:
+        PACKAGE: ${{ github.event.repository.name }}
+        GIT_VERSION: ${{ steps.from_git.outputs.version }}
+      run: |
+        echo "version=$(curl -s "https://api.anaconda.org/release/pyviz/${PACKAGE}/${GIT_VERSION}" | jq -r '.distributions[0].version // "null"')" >> $GITHUB_OUTPUT
+    - name: Print git tag and conda version found
+      shell: bash
+      env:
+        GIT_VERSION: ${{ steps.from_git.outputs.version }}
+        CONDA_VERSION: ${{ steps.from_conda.outputs.version }}
+      run: |
+        echo "Git Tag:       $GIT_VERSION"
+        echo "Conda Version: $CONDA_VERSION"
+    - name: Trigger downstream test workflow and wait
+      if: ${{ steps.from_git.outputs.version == steps.from_conda.outputs.version && github.event_name != 'workflow_dispatch' }}
+      uses: convictional/trigger-workflow-and-wait@f69fa9eedd3c62a599220f4d5745230e237904be # v1.6.5
+      with:
+        owner: holoviz
+        repo: ${{ inputs.downstream_repo }}
+        github_token: ${{ inputs.github_token }}
+        workflow_file_name: test.yaml
+        client_payload: ${{ inputs.client_payload }}
+        ref: main
+        wait_interval: 120
+        propagate_failure: true
+        trigger_workflow: true
+        wait_workflow: true

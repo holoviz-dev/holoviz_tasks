@@ -1,0 +1,34 @@
+name: Update major tag
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  move-major-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        name: Checkout repo
+        with:
+          fetch-depth: "1"
+          persist-credentials: false
+
+      - name: Update major tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          TAG="${GITHUB_REF#refs/tags/}"
+          MAJOR=$(echo "$TAG" | cut -d. -f1)
+
+          git tag -f "${MAJOR}" "${TAG}"
+          git push origin "${MAJOR}" --force

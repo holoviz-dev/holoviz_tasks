@@ -5,8 +5,7 @@ on:
     tags:
       - "v*.*.*"
 
-permissions:
-  contents: write
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -16,8 +15,10 @@ jobs:
   update-major-tag:
     name: Update major tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # OK
     steps:
-      - name: Checkout repo  # zizmor: ignore[artipacked]
+      - name: Checkout repo # zizmor: ignore[artipacked]
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: "1"

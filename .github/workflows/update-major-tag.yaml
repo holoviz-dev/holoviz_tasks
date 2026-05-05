@@ -5,7 +5,8 @@ on:
     tags:
       - "v*.*.*"
 
-permissions: {}
+permissions:
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -16,11 +17,10 @@ jobs:
     name: Update major tag
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        name: Checkout repo
+      - name: Checkout repo  # zizmor: ignore[artipacked]
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: "1"
-          persist-credentials: false
       - name: Update major tag
         run: |
           git config user.name "github-actions[bot]"

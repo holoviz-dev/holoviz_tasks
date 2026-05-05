@@ -24,11 +24,16 @@ jobs:
           fetch-depth: "1"
       - name: Update major tag
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
           TAG="${GITHUB_REF_NAME}"
           MAJOR=$(echo "$TAG" | cut -d. -f1)
+
+          if [[ "${MAJOR}" == "v0" ]]; then
+            echo "Skipping major tag update for v0"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git tag -f "${MAJOR}" "${TAG}"
           git push origin "${MAJOR}" --force

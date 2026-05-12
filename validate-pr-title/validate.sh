@@ -2,9 +2,21 @@
 
 set -euo pipefail
 
-types_pattern="$(printf '%s\n' "$TYPES" | sed '/^$/d' | paste -sd '|')"
-scopes_pattern="$(printf '%s\n' "$SCOPES" | sed '/^$/d' | paste -sd '|')"
-pattern="^(${types_pattern})(\\((${scopes_pattern})\\))?(!)?: [a-z].+"
+clean_lines() {
+    printf '%s\n' "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed '/^$/d'
+}
+
+to_pattern() {
+    clean_lines "$1" | paste -sd '|'
+}
+
+to_list() {
+    clean_lines "$1" | sort | sed 's/^/  - /'
+}
+
+types_pattern="$(to_pattern "$TYPES")"
+scopes_pattern="$(to_pattern "$SCOPES")"
+pattern="^(${types_pattern})(\\((${scopes_pattern})\\))?(!)?: [a-zA-Z].+"
 
 if ! printf '%s\n' "$TITLE" | grep -Eq "$pattern"; then
     cat <<EOF
@@ -18,19 +30,20 @@ Expected format:
 
 Scope and breaking change (!) are optional.
 
+Rules:
+
+  - Must end with a colon (e.g. 'docs:')
+  - Scope is optional
+  - Append ! for breaking changes
+
 Allowed types:
 
-$(printf '%s\n' "$TYPES" | sed 's/^/  - /')
+$(to_list "$TYPES")
 
 Allowed scopes:
 
-$(printf '%s\n' "$SCOPES" | sed 's/^/  - /')
+$(to_list "$SCOPES")
 
-Rules:
-
-  - Type must end with a colon (e.g. 'docs:')
-  - Scope is optional
-  - Append ! for breaking changes
 EOF
     exit 1
 fi

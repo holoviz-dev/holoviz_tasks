@@ -1,0 +1,42 @@
+name: Validate PR title
+description: Validate pull request titles against a conventional format
+
+inputs:
+  title:
+    description: Pull request title
+    required: true
+
+  types:
+    description: Newline-separated allowed types
+    required: false
+    default: |
+      build
+      chore
+      ci
+      compat
+      docs
+      enh
+      feat
+      fix
+      perf
+      refactor
+      test
+      type
+
+  scopes:
+    description: Newline-separated allowed scopes
+    required: false
+    default: |
+      dev
+
+runs:
+  using: composite
+
+  steps:
+    - name: Validate title
+      shell: bash
+      env:
+        TITLE: ${{ inputs.title }}
+        TYPES: ${{ inputs.types }}
+        SCOPES: ${{ inputs.scopes }}
+      run: bash "$GITHUB_ACTION_PATH/validate.sh"

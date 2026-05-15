@@ -49,6 +49,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
         GITHUB_REPOSITORY: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
         # Config
         git config user.name 'github-actions[bot]'
@@ -59,6 +60,10 @@ runs:
         git add "*.png"
         git commit -m "Optimize PNG images (lossless)"
         git push origin
+
+        # Reopen PR to trigger CI
+        gh pr close "$PR_NUMBER"
+        gh pr reopen "$PR_NUMBER"
     - if: always() && steps.cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:

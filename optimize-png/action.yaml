@@ -5,6 +5,10 @@ inputs:
     description: Version of oxipng to install
     required: false
     default: "8.0.0"
+  token:
+    description: GitHub token for pushing optimized images
+    required: false
+    default: ${{ github.token }}
 
 runs:
   using: "composite"
@@ -42,7 +46,7 @@ runs:
       shell: bash -e {0}
       if: steps.check.outputs.img_change == 'true'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.token }}
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
         # Config

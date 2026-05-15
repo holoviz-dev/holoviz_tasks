@@ -17,6 +17,7 @@ runs:
       with:
         fetch-depth: "1"
         persist-credentials: false
+        ref: ${{ github.head_ref || github.ref }}
     - uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
         path: ~/.cargo/bin/oxipng
@@ -57,7 +58,7 @@ runs:
         # Commit and push
         git add "*.png"
         git commit -m "Optimize PNG images (lossless)"
-        git push origin HEAD:${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
+        git push origin
     - if: always() && steps.cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:

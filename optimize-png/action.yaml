@@ -30,7 +30,7 @@ runs:
       run: cargo install oxipng@=$OXIPNG_VERSION
     - name: run
       shell: bash -e {0}
-      run: oxipng $(fd --type=file "\.png$" --ignore)
+      run: oxipng $(git ls-files "*.png")
     - name: check
       shell: bash -e {0}
       id: check

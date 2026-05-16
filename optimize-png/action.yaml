@@ -9,31 +9,66 @@ inputs:
     description: GitHub token for pushing optimized images
     required: false
     default: ${{ github.token }}
+  run-all:
+    description: Run optimization on all PNG files (not just changed ones)
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+    - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+      id: changes
+      with:
+        list-files: json
+        filters: |
+          png:
+            - added|modified: '**/*.png'
+    - name: should-run
+      id: should-run
+      shell: bash -e {0}
+      env:
+        PNG_CHANGED: ${{ steps.changes.outputs.png }}
+        RUN_ALL: ${{ inputs.run-all }}
+      run: |
+        if [[ "$PNG_CHANGED" == "true" || "$RUN_ALL" == "true" ]]; then
+          echo "result=true" >> $GITHUB_OUTPUT
+        else
+          echo "result=false" >> $GITHUB_OUTPUT
+        fi
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      if: steps.should-run.outputs.result == 'true'
       with:
         fetch-depth: "1"
         persist-credentials: false
         ref: ${{ github.head_ref || github.ref }}
-    - uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+    - uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      if: steps.should-run.outputs.result == 'true'
       with:
         path: ~/.cargo/bin/oxipng
         key: oxipng|${{ runner.os }}|${{ inputs.oxipng-version }}
       id: cache
     - name: install
       shell: bash -e {0}
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true' && steps.should-run.outputs.result == 'true'
       env:
         OXIPNG_VERSION: ${{ inputs.oxipng-version }}
       run: cargo install oxipng@=$OXIPNG_VERSION
     - name: run
       shell: bash -e {0}
-      run: oxipng $(git ls-files "*.png")
+      if: steps.should-run.outputs.result == 'true'
+      env:
+        RUN_ALL: ${{ inputs.run-all }}
+        PNG_FILES: ${{ steps.changes.outputs.png_files }}
+      run: |
+        if [[ "$RUN_ALL" == "true" ]]; then
+          oxipng $(git ls-files "*.png")
+        else
+          oxipng $(echo "$PNG_FILES" | jq -r '.[]')
+        fi
     - name: check
       shell: bash -e {0}
+      if: steps.should-run.outputs.result == 'true'
       id: check
       run: |
         if [[ -n $(git status --porcelain "*.png") ]]; then
@@ -45,7 +80,7 @@ runs:
         fi
     - name: commit
       shell: bash -e {0}
-      if: steps.check.outputs.img_change == 'true'
+      if: steps.check.outputs.img_change == 'true' && steps.should-run.outputs.result == 'true'
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
         GITHUB_REPOSITORY: ${{ github.repository }}
@@ -60,12 +95,8 @@ runs:
         git add "*.png"
         git commit -m "Optimize PNG images (lossless)"
         git push origin
-
-        # Reopen PR to trigger CI
-        gh pr close "$PR_NUMBER"
-        gh pr reopen "$PR_NUMBER"
-    - if: always() && steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+    - if: steps.cache.outputs.cache-hit != 'true' && steps.should-run.outputs.result == 'true'
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ~/.cargo/bin/oxipng
         key: oxipng|${{ runner.os }}|${{ inputs.oxipng-version }}

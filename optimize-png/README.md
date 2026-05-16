@@ -6,12 +6,6 @@ on:
   pull_request:
     branches:
       - "*"
-  workflow_dispatch:
-    inputs:
-      run-all:
-        description: "Run on all PNG files"
-        type: boolean
-        default: false
 
 permissions: {}
 
@@ -28,5 +22,5 @@ jobs:
     steps:
       - uses: holoviz-dev/holoviz_tasks/optimize-png@v1
         with:
-          run-all: ${{ inputs.run-all || false }}
+          run-all: false # Change to true first time
 ```

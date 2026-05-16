@@ -95,6 +95,7 @@ runs:
         git add "*.png"
         git commit -m "Optimize PNG images (lossless)"
         git push origin
+        echo "PNG images have been optimized. Please close and reopen this PR to trigger CI." >> $GITHUB_STEP_SUMMARY
     - if: steps.cache.outputs.cache-hit != 'true' && steps.should-run.outputs.result == 'true'
       uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:

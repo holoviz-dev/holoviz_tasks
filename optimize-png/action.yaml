@@ -31,7 +31,7 @@ runs:
         PNG_CHANGED: ${{ steps.changes.outputs.png }}
         RUN_ALL: ${{ inputs.run-all }}
       run: |
-        if [[ "$PNG_CHANGED" == "true" || "$RUN_ALL" == "true" ]]; then
+        if [[ ("$PNG_CHANGED" == "true" || "$RUN_ALL" == "true") && "$GITHUB_REF_NAME" != "main" ]]; then
           echo "result=true" >> $GITHUB_OUTPUT
         else
           echo "result=false" >> $GITHUB_OUTPUT

@@ -93,7 +93,7 @@ runs:
 
         # Commit and push
         git add "*.png"
-        git commit -m $'Optimize PNG images (lossless)\n\n[skip ci]'
+        git commit -m "Optimize PNG images (lossless)"
         git push origin
     - if: steps.cache.outputs.cache-hit != 'true' && steps.should-run.outputs.result == 'true'
       uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5

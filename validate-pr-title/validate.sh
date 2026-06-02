@@ -16,7 +16,7 @@ to_list() {
 
 types_pattern="$(to_pattern "$TYPES")"
 scopes_pattern="$(to_pattern "$SCOPES")"
-pattern="^(${types_pattern})(\\((${scopes_pattern})\\))?(!)?: [a-zA-Z].+"
+pattern="^(${types_pattern})(\\((${scopes_pattern})\\))?(!)?: [^ ].+"
 
 if ! printf '%s\n' "$TITLE" | grep -Eq "$pattern"; then
     cat <<EOF

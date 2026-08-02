@@ -4,7 +4,7 @@ description: Run prek
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: "1"
         filter: "blob:none"
@@ -12,7 +12,7 @@ runs:
     - name: Install prek
       shell: bash -e {0}
       run: pipx install prek
-    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/prek
         key: prek|${{ hashFiles('.pre-commit-config.yaml') }}
@@ -29,7 +29,7 @@ runs:
 
         exit $exit_code
     - if: always() && steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/prek
         key: prek|${{ hashFiles('.pre-commit-config.yaml') }}

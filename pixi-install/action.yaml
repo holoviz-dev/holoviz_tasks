@@ -43,9 +43,7 @@ runs:
     - name: Fetching tags
       shell: bash -e {0}
       run: |
-        echo "::group::Fetching tags"
         git fetch --prune --tags -f
-        echo "::endgroup::"
     - name: Setting environment variables
       if: ${{ inputs.environment_variables == 'true' }}
       shell: bash -e {0}
@@ -74,10 +72,8 @@ runs:
     - name: pixi config
       shell: bash -e {0}
       run: |
-        echo "::group::pixi config"
         mkdir ~/.pixi
         echo 'run-post-link-scripts = "insecure"' > ~/.pixi/config.toml
-        echo "::endgroup::"
     - uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.10.0
       with:
         pixi-version: ${{ inputs.pixi-version }}
@@ -91,18 +87,14 @@ runs:
       env:
         ENVS: ${{ inputs.environments }}
       run: |
-        echo "::group::Install"
         pixi run -e ${ENVS} install -v
-        echo "::endgroup::"
     - name: Download data
       if: ${{ inputs.download-data == 'true' }}
       env:
         ENVS: ${{ inputs.environments }}
       shell: bash -e {0}
       run: |
-        echo "::group::Download data"
         # INFO: Does not really work with environments as it can be multiple but good enough
         if pixi task list -e ${ENVS} 2>&1 | grep "download-data"; then
           pixi run -e ${ENVS} download-data
         fi
-        echo "::endgroup::"

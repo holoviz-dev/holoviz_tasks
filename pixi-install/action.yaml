@@ -83,7 +83,7 @@ runs:
         activate-environment: ${{ inputs.pixi-activate-environment }}
         cache: false  # Cache is slower than downloading!
     - name: Install step
-      if: ${{ inputs.install == 'true' && hashFiles('pixi.lock') == '' }}
+      if: ${{ inputs.install == 'true' && hashFiles('pixi.lock') != '' }}
       shell: bash -e {0}
       env:
         ENVS: ${{ inputs.environments }}

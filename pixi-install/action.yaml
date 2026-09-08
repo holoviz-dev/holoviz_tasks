@@ -88,7 +88,7 @@ runs:
       env:
         ENVS: ${{ inputs.environments }}
       run: |
-        if pixi task list -e ${ENVS} 2>&1 | grep "install"; then
+        if pixi task list -e ${ENVS} 2>&1 | grep -qx "install"; then
           pixi run -e ${ENVS} install -v
         fi
     - name: Download data
@@ -98,6 +98,6 @@ runs:
       shell: bash -e {0}
       run: |
         # INFO: Does not really work with environments as it can be multiple but good enough
-        if pixi task list -e ${ENVS} 2>&1 | grep "download-data"; then
+        if pixi task list -e ${ENVS} 2>&1 | grep -qx "download-data"; then
           pixi run -e ${ENVS} download-data
         fi

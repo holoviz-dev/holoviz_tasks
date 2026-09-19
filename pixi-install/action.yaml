@@ -59,7 +59,6 @@ runs:
         echo "NUMEXPR_NUM_THREADS=1" >> $GITHUB_ENV
         # This is to avoid warnings for debugpy on newer versions of Python
         echo "PYDEVD_DISABLE_FILE_VALIDATION=1" >> $GITHUB_ENV
-        id: install
     - name: Increase port range
       if: runner.os == 'Windows'
       shell: bash -e {0}

@@ -59,6 +59,14 @@ runs:
         echo "NUMEXPR_NUM_THREADS=1" >> $GITHUB_ENV
         # This is to avoid warnings for debugpy on newer versions of Python
         echo "PYDEVD_DISABLE_FILE_VALIDATION=1" >> $GITHUB_ENV
+        id: install
+    - name: Increase port range
+      if: runner.os == 'Windows'
+      run: |
+        # Each UI test uses new ports, which can exhaust the default range
+        # and fail connections with WSAENOBUFS (net::ERR_NO_BUFFER_SPACE).
+        netsh int ipv4 set dynamicport tcp start=10000 num=55535
+        netsh int ipv6 set dynamicport tcp start=10000 num=55535
     - name: OpenGL
       if: inputs.opengl == 'true'
       uses: pyvista/setup-headless-display-action@b0bf9f57d62d2b3fee9f1c0e0c7e390f05e97a4e # v5.0

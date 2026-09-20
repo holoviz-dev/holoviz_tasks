@@ -65,8 +65,8 @@ runs:
       run: |
         # Each UI test uses new ports, which can exhaust the default range
         # and fail connections with WSAENOBUFS (net::ERR_NO_BUFFER_SPACE).
-        netsh int ipv4 set dynamicport tcp start=10081 num=55535
-        netsh int ipv6 set dynamicport tcp start=10081 num=55535
+        netsh int ipv4 set dynamicport tcp start=10081 num=55455
+        netsh int ipv6 set dynamicport tcp start=10081 num=55455
     - name: OpenGL
       if: inputs.opengl == 'true'
       uses: pyvista/setup-headless-display-action@b0bf9f57d62d2b3fee9f1c0e0c7e390f05e97a4e # v5.0

@@ -1,0 +1,76 @@
+name: Pixi diff
+description: Summarize pixi.lock changes against the base branch and comment them on the PR
+inputs:
+  github-token:
+    description: Token used to create or update the PR comment, needs `pull-requests: write`
+    required: false
+    default: ${{ github.token }}
+  base-sha:
+    description: The revision to compare pixi.lock against, defaults to the PR base or `origin/main`
+    required: false
+    default: ${{ github.event.pull_request.base.sha }}
+outputs:
+  body:
+    description: The markdown summary of the pixi.lock changes, empty if there are none
+    value: ${{ steps.diff.outputs.body }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: "0"
+        persist-credentials: false
+    - name: Hash script
+      id: hash
+      shell: bash -e {0}
+      run: |
+        # hashFiles only works inside the workspace
+        echo "hash=$(sha256sum "${GITHUB_ACTION_PATH}/pixi-diff.py" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ runner.temp }}/.pipx/.cache
+        key: pipx-${{ steps.hash.outputs.hash }}
+    - name: Generate pixi.lock diff
+      id: diff
+      shell: bash -e {0}
+      env:
+        BASE_SHA: ${{ inputs.base-sha }}
+        PIPX_HOME: ${{ runner.temp }}/.pipx
+      run: |
+        {
+          echo 'body<<PIXI_LOCK_DIFF_EOF'
+          pipx run "${GITHUB_ACTION_PATH}/pixi-diff.py"
+          echo 'PIXI_LOCK_DIFF_EOF'
+        } >> "$GITHUB_OUTPUT"
+    - name: Write summary
+      if: steps.diff.outputs.body != ''
+      shell: bash -e {0}
+      env:
+        BODY: ${{ steps.diff.outputs.body }}
+      run: echo "${BODY}" >> "$GITHUB_STEP_SUMMARY"
+    - name: Create or update comment
+      if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+      shell: bash -e {0}
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        BODY: ${{ steps.diff.outputs.body }}
+      run: |
+        COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate \
+          --jq '.[] | select(.body | startswith("<!-- pixi-lock-diff -->")) | .id' | head -n1)
+
+        if [[ -z "${BODY}" ]]; then
+          if [[ -n "${COMMENT_ID}" ]]; then
+            gh api "repos/${REPO}/issues/comments/${COMMENT_ID}" -X PATCH \
+              -f body=$'<!-- pixi-lock-diff -->\n## Pixi.lock changes\n\nNo changes to pixi.lock.'
+          fi
+          exit 0
+        fi
+
+        if [[ -n "${COMMENT_ID}" ]]; then
+          gh api "repos/${REPO}/issues/comments/${COMMENT_ID}" -X PATCH -f body="${BODY}"
+        else
+          gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "${BODY}"
+        fi

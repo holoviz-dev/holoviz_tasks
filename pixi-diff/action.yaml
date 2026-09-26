@@ -2,7 +2,7 @@ name: Pixi diff
 description: Summarize pixi.lock changes against the base branch and comment them on the PR
 inputs:
   github-token:
-    description: Token used to create or update the PR comment, needs `pull-requests: write`
+    description: "Token used to create or update the PR comment, needs `pull-requests: write`"
     required: false
     default: ${{ github.token }}
   base-sha:

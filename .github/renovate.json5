@@ -1,28 +1,34 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":enablePreCommit"],
-  "schedule": ["after 12am and before 5am on the first day of the month"],
-  "enabledManagers": ["github-actions", "pre-commit"],
-  "commitMessagePrefix": "chore(bot):",
-  "automerge": true,
-  "minimumReleaseAge": "7 days",
-  "packageRules": [
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended", ":enablePreCommit"],
+  enabledManagers: ["github-actions", "pre-commit"],
+  lockFileMaintenance: { enabled: true },
+  schedule: ["* * 1 * *"],
+
+  automerge: true,
+  commitMessagePrefix: "chore(bot):",
+  prConcurrentLimit: 0,
+  prCreation: "immediate",
+  prHourlyLimit: 0,
+
+  internalChecksFilter: "strict",
+  minimumReleaseAge: "7 days",
+  separateMajorMinor: false,
+
+  packageRules: [
     {
-      "groupName": "GitHub Actions",
-      "matchManagers": ["github-actions"],
-      "description": "Weekly update of GitHub Actions",
-      "pinDigests": true
+      groupName: "GitHub Actions",
+      matchManagers: ["github-actions"],
+      pinDigests: true,
     },
     {
-      "matchManagers": ["github-actions"],
-      "matchPackageNames": ["holoviz-dev/holoviz_tasks"],
-      "minimumReleaseAge": "0 days",
-      "schedule": ["after 12am and before 5am"]
+      groupName: "pre-commit",
+      matchManagers: ["pre-commit"],
     },
-    {
-      "groupName": "pre-commit dependencies",
-      "matchManagers": ["pre-commit"],
-      "description": "Weekly update of pre-commit"
-    }
-  ]
+  ],
+  vulnerabilityAlerts: {
+    enabled: true,
+    minimumReleaseAge: null,
+    vulnerabilityFixStrategy: "lowest",
+  },
 }

@@ -30,16 +30,34 @@ runs:
       with:
         path: pixi.lock
         key: pixi|${{ steps.set-today.outputs.TODAY }}|${{ hashFiles('pixi.toml') }}
+    - name: Check cached lock
+      id: check
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash -e {0}
+      run: |
+        # Builds on a dev label can be removed after the lock was cached,
+        # and installing from that lock then fails, so solve it again
+        for url in $(grep -oE 'https://conda.anaconda.org/[^ ]+/label/dev/[^ ]+[.](conda|tar[.]bz2)' pixi.lock | sort -u); do
+          if ! curl -sfIL -o /dev/null "$url"; then
+            echo "::warning::$url is no longer available, solving the lock again"
+            echo "stale=true" >> $GITHUB_OUTPUT
+            break
+          fi
+        done
     - uses: prefix-dev/setup-pixi@ad1da6449d9e506fd127fd67ab2d054a769f6a94 # v0.11.2
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true' || steps.check.outputs.stale == 'true'
       with:
         pixi-version: ${{ inputs.pixi-version }}
         manifest-path: ${{ inputs.pixi-manifest-path }}
         run-install: false
     - name: Lock
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true' || steps.check.outputs.stale == 'true'
       shell: bash -e {0}
+      env:
+        STALE: ${{ steps.check.outputs.stale }}
       run: |
+        # pixi lock keeps what an existing lock pins, so drop the stale one
+        if [ "$STALE" = "true" ]; then rm pixi.lock; fi
         pixi lock --color=always
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
